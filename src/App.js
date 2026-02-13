@@ -5,68 +5,22 @@ import {
   BookOpen, DollarSign, Calendar
 } from 'lucide-react';
 
-// Simulated backend - we'll replace this with Supabase later
+import { supabase } from './supabaseClient';
+
 const simulatedBackend = {
   getOffices: async (zipCode, state) => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return [
-      { 
-        id: 1, 
-        title: 'U.S. House of Representatives - District 5',
-        level: 'federal',
-        officeType: 'house',
-        nextElection: '2026-11-03',
-        incumbent: 'John Smith (D)',
-        filingDeadline: '2026-03-15',
-        estimatedCost: '$800,000 - $2,500,000',
-        confidence: 'verified',
-        term: '2 years',
-        minAge: 25,
-        salary: '$174,000/year'
-      },
-      {
-        id: 2,
-        title: 'State Senate - District 12',
-        level: 'state',
-        officeType: 'stateSenate',
-        nextElection: '2026-11-03',
-        incumbent: 'Sarah Johnson (R)',
-        filingDeadline: '2026-04-01',
-        estimatedCost: '$150,000 - $400,000',
-        confidence: 'high',
-        term: '4 years',
-        minAge: 18,
-        salary: '$45,000/year (part-time)'
-      },
-      {
-        id: 3,
-        title: 'City Council - Ward 3',
-        level: 'local',
-        officeType: 'cityCouncil',
-        nextElection: '2025-11-04',
-        incumbent: 'None (Open Seat)',
-        filingDeadline: '2025-08-15',
-        estimatedCost: '$15,000 - $50,000',
-        confidence: 'verified',
-        term: '4 years',
-        minAge: 18,
-        salary: '$25,000/year (part-time)'
-      },
-      {
-        id: 4,
-        title: 'School Board - District 2',
-        level: 'local',
-        officeType: 'schoolBoard',
-        nextElection: '2025-05-06',
-        incumbent: 'Maria Garcia',
-        filingDeadline: '2025-03-01',
-        estimatedCost: '$5,000 - $20,000',
-        confidence: 'high',
-        term: '4 years',
-        minAge: 18,
-        salary: 'Unpaid (volunteer position)'
-      }
-    ];
+    // Fetch real data from Supabase
+    const { data, error } = await supabase
+      .from('offices')
+      .select('*')
+      .eq('state', state);
+    
+    if (error) {
+      console.error('Error fetching offices:', error);
+      return [];
+    }
+    
+    return data;
   },
   
   generatePlan: (office) => {
