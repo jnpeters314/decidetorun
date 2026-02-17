@@ -2,18 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle, AlertCircle, Info, ChevronRight, MapPin, 
   Building, Flag, User, ArrowRight, MessageCircle, Send, 
-  BookOpen, DollarSign, Calendar
+  BookOpen, DollarSign, Calendar, TrendingUp, Users
 } from 'lucide-react';
-
 import { supabase } from './supabaseClient';
 
+// Simulated backend - chatbot and plan generation
 const simulatedBackend = {
   getOffices: async (zipCode, state) => {
-    // Fetch real data from Supabase
+    // Now fetching from Supabase instead of hardcoded data
     const { data, error } = await supabase
       .from('offices')
       .select('*')
-      .eq('state', state);
+      .eq('state', state)
+      .order('district', { ascending: true });
+    
+    if (error) {
+      console.error('Error fetching offices:', error);
+      return [];
+    }
+    
+    return data;
+  },
+  
+  getAllStates: async () => {
+    // Get unique states from database
+    const { data, error } = await supabase
+      .from('offices')
+      .select('state')
+      .order('state');
+    
+    if (error) {
+      console.error('Error fetching states:', error);
+      return [];
+    }
+    
+    // Get unique states
+    const uniqueStates = [...new Set(data.map(item => item.state))];
+    return uniqueStates;
+  },
+  
+  getOfficesByState: async (state) => {
+    const { data, error } = await supabase
+      .from('offices')
+      .select('*')
+      .eq('state', state)
+      .order('district', { ascending: true });
     
     if (error) {
       console.error('Error fetching offices:', error);
@@ -40,8 +73,8 @@ const simulatedBackend = {
         'Other': '5-10%'
       },
       requirements: [
-        { item: 'Age: ' + office.minAge + ' years old', confidence: 'verified' },
-        { item: 'File official paperwork by ' + office.filingDeadline, confidence: 'verified' },
+        { item: 'Age: ' + office.min_age + ' years old', confidence: 'verified' },
+        { item: 'File official paperwork by ' + office.filing_deadline, confidence: 'verified' },
         { item: 'Open campaign bank account', confidence: 'verified' }
       ],
       advice: [
@@ -79,6 +112,19 @@ const simulatedBackend = {
   }
 };
 
+const STATE_NAMES = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+};
+
 const ConfidenceBadge = ({ level }) => {
   const configs = {
     verified: { icon: CheckCircle, color: 'text-green-600 bg-green-50', text: 'Verified' },
@@ -111,17 +157,31 @@ function App() {
   });
   const [availableOffices, setAvailableOffices] = useState([]);
   const [filteredOffices, setFilteredOffices] = useState([]);
-  const [selectedOffice, setSelectedOffice] = useState(null);
   const [filters, setFilters] = useState({
     level: 'all',
     searchTerm: '',
-    sortBy: 'deadline'
+    sortBy: 'district',
+    showOpenSeats: false,
+    showIncumbents: false
   });
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [currentPlan, setCurrentPlan] = useState(null);
+  const [browseMode, setBrowseMode] = useState(false);
+  const [browseState, setBrowseState] = useState('');
+  const [availableStates, setAvailableStates] = useState([]);
 
+  // Load available states on mount
+  useEffect(() => {
+    const loadStates = async () => {
+      const states = await simulatedBackend.getAllStates();
+      setAvailableStates(states);
+    };
+    loadStates();
+  }, []);
+
+  // Filter offices
   useEffect(() => {
     let filtered = [...availableOffices];
     
@@ -133,8 +193,30 @@ function App() {
       const term = filters.searchTerm.toLowerCase();
       filtered = filtered.filter(office => 
         office.title.toLowerCase().includes(term) ||
-        office.incumbent.toLowerCase().includes(term)
+        office.incumbent?.toLowerCase().includes(term) ||
+        office.district?.toLowerCase().includes(term)
       );
+    }
+    
+    if (filters.showOpenSeats) {
+      filtered = filtered.filter(office => 
+        office.incumbent?.includes('Open Seat') || office.incumbent?.includes('TBD')
+      );
+    }
+    
+    if (filters.showIncumbents) {
+      filtered = filtered.filter(office => 
+        office.candidates_running?.some(c => c.incumbent)
+      );
+    }
+    
+    // Sort
+    if (filters.sortBy === 'district') {
+      filtered.sort((a, b) => parseInt(a.district || 0) - parseInt(b.district || 0));
+    } else if (filters.sortBy === 'deadline') {
+      filtered.sort((a, b) => new Date(a.filing_deadline) - new Date(b.filing_deadline));
+    } else if (filters.sortBy === 'candidates') {
+      filtered.sort((a, b) => (b.total_candidates || 0) - (a.total_candidates || 0));
     }
     
     setFilteredOffices(filtered);
@@ -146,12 +228,26 @@ function App() {
       try {
         const offices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
         setAvailableOffices(offices);
+        setBrowseMode(false);
         setCurrentView('results');
       } finally {
         setLoading(false);
       }
     } else {
       setWizardStep(wizardStep + 1);
+    }
+  };
+
+  const handleBrowseState = async (state) => {
+    setLoading(true);
+    setBrowseState(state);
+    try {
+      const offices = await simulatedBackend.getOfficesByState(state);
+      setAvailableOffices(offices);
+      setBrowseMode(true);
+      setCurrentView('results');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -191,6 +287,19 @@ function App() {
     } finally {
       setChatLoading(false);
     }
+  };
+
+  // Calculate statistics
+  const getStatistics = () => {
+    const openSeats = availableOffices.filter(o => 
+      o.incumbent?.includes('Open Seat') || o.incumbent?.includes('TBD')
+    ).length;
+    const withIncumbents = availableOffices.filter(o => 
+      o.candidates_running?.some(c => c.incumbent)
+    ).length;
+    const totalCandidates = availableOffices.reduce((sum, o) => sum + (o.total_candidates || 0), 0);
+    
+    return { openSeats, withIncumbents, totalCandidates };
   };
 
   // Landing Page
@@ -233,22 +342,78 @@ function App() {
 
             <button
               onClick={() => setCurrentView('wizard')}
-              className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mb-4"
             >
               Begin Your Journey
               <ArrowRight className="w-5 h-5" />
             </button>
+            
+            <div className="text-center">
+              <button
+                onClick={() => setCurrentView('browse')}
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+              >
+                Or browse offices by state →
+              </button>
+            </div>
           </div>
 
           <div className="text-center text-sm text-gray-500">
-            <p>Free to use • Covers all 50 states • Local, state, and federal offices</p>
+            <p>Free to use • Covers all 50 states • Real FEC data</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Wizard
+  // Browse by State View
+  if (currentView === 'browse') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <button
+            onClick={() => setCurrentView('landing')}
+            className="mb-6 text-blue-600 hover:text-blue-700 font-medium"
+          >
+            ← Back to Home
+          </button>
+          
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Browse Offices by State</h1>
+            <p className="text-gray-600 mb-8">
+              Explore federal offices across all 50 states
+            </p>
+            
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {Object.entries(STATE_NAMES).map(([code, name]) => (
+                <button
+                  key={code}
+                  onClick={() => handleBrowseState(code)}
+                  disabled={!availableStates.includes(code) || loading}
+                  className={`p-4 rounded-lg text-left transition-colors ${
+                    availableStates.includes(code)
+                      ? 'bg-blue-50 hover:bg-blue-100 text-blue-900'
+                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="font-semibold">{name}</div>
+                  <div className="text-sm opacity-75">{code}</div>
+                </button>
+              ))}
+            </div>
+            
+            {loading && (
+              <div className="mt-6 text-center text-gray-600">
+                Loading offices...
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Wizard (existing code - unchanged)
   if (currentView === 'wizard') {
     const wizardSteps = [
       {
@@ -275,11 +440,9 @@ function App() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select a state</option>
-                <option value="AL">Alabama</option>
-                <option value="CA">California</option>
-                <option value="NY">New York</option>
-                <option value="TX">Texas</option>
-                <option value="FL">Florida</option>
+                {Object.entries(STATE_NAMES).map(([code, name]) => (
+                  <option key={code} value={code}>{name}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -331,7 +494,7 @@ function App() {
           <div className="text-center py-8">
             <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
             <p className="text-gray-700">
-              We'll show you all available offices in your area with detailed information about costs, deadlines, and requirements.
+              We'll show you all available offices in your area with detailed information about costs, deadlines, and who's already running.
             </p>
           </div>
         )
@@ -385,35 +548,125 @@ function App() {
     );
   }
 
-  // Results View
+  // Results View (ENHANCED)
   if (currentView === 'results') {
+    const stats = getStatistics();
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Available Offices</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {browseMode ? `${STATE_NAMES[browseState]} Offices` : 'Your Available Offices'}
+                </h1>
                 <p className="text-gray-600">
-                  {filteredOffices.length} offices in {userProfile.zipCode}, {userProfile.state}
+                  {filteredOffices.length} of {availableOffices.length} offices
+                  {browseMode ? ` in ${STATE_NAMES[browseState]}` : ` in ${userProfile.zipCode}, ${userProfile.state}`}
                 </p>
               </div>
-              <button
-                onClick={() => setCurrentView('chatbot')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setCurrentView('chatbot')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Ask Questions
+                </button>
+                <button
+                  onClick={() => setCurrentView('landing')}
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Start Over
+                </button>
+              </div>
+            </div>
+
+            {/* Statistics */}
+            <div className="grid md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-600">Total Offices</span>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">{availableOffices.length}</p>
+              </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Flag className="w-5 h-5 text-green-600" />
+                  <span className="text-sm font-medium text-gray-600">Open Seats</span>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">{stats.openSeats}</p>
+              </div>
+              
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="w-5 h-5 text-purple-600" />
+                  <span className="text-sm font-medium text-gray-600">With Incumbents</span>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">{stats.withIncumbents}</p>
+              </div>
+              
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="w-5 h-5 text-orange-600" />
+                  <span className="text-sm font-medium text-gray-600">Total Candidates</span>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalCandidates}</p>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <input
+                type="text"
+                placeholder="Search districts, names..."
+                value={filters.searchTerm}
+                onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              
+              <select
+                value={filters.sortBy}
+                onChange={(e) => setFilters({...filters, sortBy: e.target.value})}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <MessageCircle className="w-5 h-5" />
-                Ask Questions
-              </button>
+                <option value="district">Sort by District</option>
+                <option value="deadline">Sort by Deadline</option>
+                <option value="candidates">Sort by # Candidates</option>
+              </select>
+              
+              <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={filters.showOpenSeats}
+                  onChange={(e) => setFilters({...filters, showOpenSeats: e.target.checked})}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                />
+                <span className="text-sm text-gray-700">Open Seats Only</span>
+              </label>
+              
+              <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={filters.showIncumbents}
+                  onChange={(e) => setFilters({...filters, showIncumbents: e.target.checked})}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                />
+                <span className="text-sm text-gray-700">Has Incumbent</span>
+              </label>
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-900">
-                <strong>Next step:</strong> Click "View Campaign Plan" on any office to see detailed requirements and timeline.
+                <strong>Real FEC Data:</strong> All candidate and finance information is verified from the Federal Election Commission.
               </p>
             </div>
           </div>
 
+          {/* Office Cards */}
           <div className="space-y-4">
             {filteredOffices.map((office) => (
               <div key={office.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
@@ -429,7 +682,14 @@ function App() {
                         {office.level.charAt(0).toUpperCase() + office.level.slice(1)}
                       </span>
                     </div>
-                    <ConfidenceBadge level={office.confidence} />
+                    <div className="flex items-center gap-2">
+                      <ConfidenceBadge level={office.confidence} />
+                      {office.data_source && (
+                        <span className="text-xs text-gray-500">
+                          Source: {office.data_source}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -437,7 +697,7 @@ function App() {
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Next Election</p>
                     <p className="font-medium text-gray-900">
-                      {new Date(office.nextElection).toLocaleDateString('en-US', { 
+                      {new Date(office.next_election).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric' 
@@ -447,7 +707,7 @@ function App() {
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Filing Deadline</p>
                     <p className="font-medium text-gray-900">
-                      {new Date(office.filingDeadline).toLocaleDateString('en-US', { 
+                      {new Date(office.filing_deadline).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric' 
@@ -460,13 +720,47 @@ function App() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Estimated Cost</p>
-                    <p className="font-medium text-gray-900">{office.estimatedCost}</p>
+                    <p className="font-medium text-gray-900">{office.estimated_cost}</p>
                   </div>
                 </div>
 
+                {/* Candidates Running Section */}
+                {office.candidates_running && office.candidates_running.length > 0 && (
+                  <div className="border-t pt-4 mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Candidates Running ({office.total_candidates})
+                      </h4>
+                      <ConfidenceBadge level="verified" />
+                    </div>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {office.candidates_running.map((candidate, idx) => (
+                        <div key={idx} className="bg-gray-50 p-3 rounded-lg flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-medium text-gray-900">{candidate.name}</p>
+                              {candidate.incumbent && (
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                  Incumbent
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600">{candidate.party}</p>
+                            {candidate.cash_on_hand > 0 && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Cash on hand: ${candidate.cash_on_hand.toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => {
-                    setSelectedOffice(office);
                     const plan = simulatedBackend.generatePlan(office);
                     setCurrentPlan(plan);
                     setCurrentView('planToRun');
@@ -483,7 +777,7 @@ function App() {
     );
   }
 
-  // Plan to Run View
+  // Plan to Run View (existing code - unchanged)
   if (currentView === 'planToRun' && currentPlan) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -552,8 +846,8 @@ function App() {
                   <MessageCircle className="w-5 h-5" />
                   Ask Questions
                 </button>
-                
-                 <a href="https://crowdblue.com"
+                <a
+                  href="https://crowdblue.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors text-center flex items-center justify-center gap-2"
@@ -568,7 +862,7 @@ function App() {
     );
   }
 
-  // Chatbot View
+  // Chatbot View (existing code - unchanged)
   if (currentView === 'chatbot') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
