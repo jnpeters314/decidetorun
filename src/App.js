@@ -864,26 +864,60 @@ const getStatistics = () => {
                       <ConfidenceBadge level="verified" />
                     </div>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {office.candidates_running.map((candidate, idx) => (
-                        <div key={idx} className="bg-gray-50 p-3 rounded-lg flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="font-medium text-gray-900">{candidate.name}</p>
-                              {candidate.incumbent && (
-                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
-                                  Incumbent
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-600">{candidate.party}</p>
-                            {candidate.cash_on_hand > 0 && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Cash on hand: ${candidate.cash_on_hand.toLocaleString()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                    {office.candidates_running.map((candidate, idx) => (
+  <div key={idx} className="bg-gray-50 p-3 rounded-lg">
+    <div className="flex items-start justify-between mb-2">
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <p className="font-medium text-gray-900">{candidate.name}</p>
+          {candidate.incumbent && (
+            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+              Incumbent
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-600">{candidate.party}</p>
+      </div>
+    </div>
+    
+    {/* Fundraising Stats */}
+    {(candidate.receipts > 0 || candidate.cash_on_hand > 0 || candidate.disbursements > 0) && (
+      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200">
+        {candidate.receipts > 0 && (
+          <div>
+            <p className="text-xs text-gray-500">Raised</p>
+            <p className="text-sm font-semibold text-green-600">
+              ${(candidate.receipts / 1000).toFixed(0)}K
+            </p>
+          </div>
+        )}
+        {candidate.disbursements > 0 && (
+          <div>
+            <p className="text-xs text-gray-500">Spent</p>
+            <p className="text-sm font-semibold text-red-600">
+              ${(candidate.disbursements / 1000).toFixed(0)}K
+            </p>
+          </div>
+        )}
+        {candidate.cash_on_hand > 0 && (
+          <div>
+            <p className="text-xs text-gray-500">Cash On Hand</p>
+            <p className="text-sm font-semibold text-blue-600">
+              ${(candidate.cash_on_hand / 1000).toFixed(0)}K
+            </p>
+          </div>
+        )}
+      </div>
+    )}
+    
+    {/* Show if no finance data yet */}
+    {candidate.receipts === 0 && candidate.cash_on_hand === 0 && candidate.disbursements === 0 && (
+      <p className="text-xs text-gray-400 italic pt-2 border-t border-gray-200">
+        No finance data filed yet
+      </p>
+    )}
+  </div>
+))}
                     </div>
                   </div>
                 )}
