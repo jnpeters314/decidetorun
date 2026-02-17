@@ -289,18 +289,51 @@ function App() {
     }
   };
 
-  // Calculate statistics
-  const getStatistics = () => {
-    const openSeats = availableOffices.filter(o => 
-      o.incumbent?.includes('Open Seat') || o.incumbent?.includes('TBD')
-    ).length;
-    const withIncumbents = availableOffices.filter(o => 
-      o.candidates_running?.some(c => c.incumbent)
-    ).length;
-    const totalCandidates = availableOffices.reduce((sum, o) => sum + (o.total_candidates || 0), 0);
-    
-    return { openSeats, withIncumbents, totalCandidates };
+// Calculate statistics
+const getStatistics = () => {
+  const openSeats = availableOffices.filter(o => 
+    o.incumbent?.includes('Open Seat') || o.incumbent?.includes('TBD')
+  ).length;
+  const withIncumbents = availableOffices.filter(o => 
+    o.candidates_running?.some(c => c.incumbent)
+  ).length;
+  const totalCandidates = availableOffices.reduce((sum, o) => sum + (o.total_candidates || 0), 0);
+  
+  // NEW: Most competitive races
+  const mostCompetitive = [...availableOffices]
+    .filter(o => o.total_candidates > 0)
+    .sort((a, b) => (b.total_candidates || 0) - (a.total_candidates || 0))
+    .slice(0, 5);
+  
+  // NEW: Upcoming deadlines (next 90 days)
+  const now = new Date();
+  const ninetyDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+  const upcomingDeadlines = availableOffices
+    .filter(o => {
+      const deadline = new Date(o.filing_deadline);
+      return deadline >= now && deadline <= ninetyDaysFromNow;
+    })
+    .sort((a, b) => new Date(a.filing_deadline) - new Date(b.filing_deadline))
+    .slice(0, 5);
+  
+  // NEW: Party breakdown
+  const partyCount = { D: 0, R: 0, I: 0, Other: 0 };
+  availableOffices.forEach(office => {
+    if (office.incumbent?.includes('(D)')) partyCount.D++;
+    else if (office.incumbent?.includes('(R)')) partyCount.R++;
+    else if (office.incumbent?.includes('(I)')) partyCount.I++;
+    else partyCount.Other++;
+  });
+  
+  return { 
+    openSeats, 
+    withIncumbents, 
+    totalCandidates,
+    mostCompetitive,
+    upcomingDeadlines,
+    partyCount
   };
+};
 
   // Landing Page
   if (currentView === 'landing') {
@@ -617,6 +650,102 @@ function App() {
                 <p className="text-2xl font-bold text-gray-900">{stats.totalCandidates}</p>
               </div>
             </div>
+
+{/* NEW: Insights Section */}
+<div className="grid md:grid-cols-2 gap-6 mb-6">
+  {/* Most Competitive Races */}
+  {stats.mostCompetitive.length > 0 && (
+    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200">
+      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <TrendingUp className="w-5 h-5 text-purple-600" />
+        Most Competitive Races
+      </h3>
+      <div className="space-y-3">
+        {stats.mostCompetitive.map((office, idx) => (
+          <div key={office.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
+            <div className="flex-1">
+              <p className="font-medium text-sm text-gray-900">
+                {office.state}-{office.district}
+              </p>
+              <p className="text-xs text-gray-600">
+                {office.incumbent}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-purple-600">
+                {office.total_candidates}
+              </p>
+              <p className="text-xs text-gray-500">candidates</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+  
+  {/* Upcoming Deadlines */}
+  {stats.upcomingDeadlines.length > 0 && (
+    <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-lg border border-orange-200">
+      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <Calendar className="w-5 h-5 text-orange-600" />
+        Upcoming Deadlines (90 Days)
+      </h3>
+      <div className="space-y-3">
+        {stats.upcomingDeadlines.map((office, idx) => (
+          <div key={office.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
+            <div className="flex-1">
+              <p className="font-medium text-sm text-gray-900">
+                {office.state}-{office.district}
+              </p>
+              <p className="text-xs text-gray-600">
+                {office.incumbent}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-orange-600">
+                {new Date(office.filing_deadline).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              </p>
+              <p className="text-xs text-gray-500">deadline</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+  
+  {/* Party Breakdown */}
+  {!browseMode && (
+    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+      <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <Users className="w-5 h-5 text-blue-600" />
+        Current Incumbents by Party
+      </h3>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-gray-700">Democratic</span>
+          <span className="text-2xl font-bold text-blue-600">{stats.partyCount.D}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-gray-700">Republican</span>
+          <span className="text-2xl font-bold text-red-600">{stats.partyCount.R}</span>
+        </div>
+        {stats.partyCount.I > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-700">Independent</span>
+            <span className="text-2xl font-bold text-purple-600">{stats.partyCount.I}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <span className="text-gray-700">Open/Other</span>
+          <span className="text-2xl font-bold text-gray-600">{stats.partyCount.Other}</span>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
 
             {/* Filters */}
             <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
