@@ -1,11 +1,14 @@
+require('dotenv').config({ path: '.env.local' });
+
+
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
-  'https://pmiqbxxvoabowwiedrej.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtaXFieHh2b2Fib3d3aWVkcmVqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDk5NDI5NiwiZXhwIjoyMDg2NTcwMjk2fQ.FCtTA7IPOYA_S9OEY4OKmVxRjHABkLf3JOqwohjJl00'
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const FEC_API_KEY = 'NzGfQnzXTQFtl21oKPjxyoqA33nztEQesbo60ILa';
+const FEC_API_KEY = process.env.FEC_API_KEY;
 
 // States with Senate races in 2026
 const SENATE_STATES_2026 = [
