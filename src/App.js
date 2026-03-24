@@ -48,8 +48,7 @@ const simulatedBackend = {
       .from('offices')
       .select('state')
       .order('state')
-      .limit(1000); 
-
+      .limit(7500);
     
     if (error) {
       console.error('Error fetching states:', error);
