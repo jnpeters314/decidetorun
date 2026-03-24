@@ -130,24 +130,7 @@ export const cityToPageTitle = (city, state) => {
   
   // Parse wikitext into office objects
   const parseElectionsFromWikitext = (wikitext, location, state) => {
-    const officeTypes = [
-        { keyword: 'mayor', title: `Mayor of ${location}`, type: 'mayor', cost: '$50,000-$500,000' },
-        { keyword: 'city council', title: `${location} City Council`, type: 'city_council', cost: '$10,000-$100,000' },
-        { keyword: 'board of supervisors', title: `${location} Board of Supervisors`, type: 'board_of_supervisors', cost: '$50,000-$200,000' },
-        { keyword: 'school board', title: `${location} School Board`, type: 'school_board', cost: '$5,000-$50,000' },
-        { keyword: 'community college board', title: `${location} Community College Board`, type: 'college_board', cost: '$5,000-$30,000' },
-        { keyword: 'county supervisor', title: `${location} County Supervisor`, type: 'county_supervisor', cost: '$50,000-$200,000' },
-        { keyword: 'county clerk', title: `${location} County Clerk`, type: 'county_clerk', cost: '$20,000-$100,000' },
-        { keyword: 'sheriff', title: `${location} Sheriff`, type: 'sheriff', cost: '$50,000-$200,000' },
-        { keyword: 'district attorney', title: `${location} District Attorney`, type: 'district_attorney', cost: '$50,000-$300,000' },
-        { keyword: 'city attorney', title: `${location} City Attorney`, type: 'city_attorney', cost: '$50,000-$200,000' },
-        { keyword: 'water board', title: `${location} Water Board`, type: 'water_board', cost: '$5,000-$30,000' },
-        { keyword: 'assessor', title: `${location} Assessor-Recorder`, type: 'assessor', cost: '$20,000-$100,000' },
-        { keyword: 'public defender', title: `${location} Public Defender`, type: 'public_defender', cost: '$20,000-$100,000' },
-        { keyword: 'treasurer', title: `${location} Treasurer`, type: 'treasurer', cost: '$20,000-$100,000' },
-        { keyword: 'bart director', title: `BART Board of Directors`, type: 'bart_director', cost: '$10,000-$50,000' },
-        { keyword: 'superior court', title: `${location} Superior Court Judge`, type: 'judge', cost: '$50,000-$200,000' },
-      ];
+    const offices = [];
     const currentYear = new Date().getFullYear();
     const yearSections = wikitext.split(/===(\d{4})===/);
   
@@ -165,17 +148,25 @@ export const cityToPageTitle = (city, state) => {
       const filingDeadline = filingMatch
         ? new Date(filingMatch[1]).toISOString().split('T')[0]
         : `${year}-03-01`;
-  
-      const officeTypes = [
-        { keyword: 'mayor', title: `Mayor of ${location}`, type: 'mayor', cost: '$50,000-$500,000' },
-        { keyword: 'city council', title: `${location} City Council`, type: 'city_council', cost: '$10,000-$100,000' },
-        { keyword: 'school board', title: `${location} School Board`, type: 'school_board', cost: '$5,000-$50,000' },
-        { keyword: 'county supervisor', title: `${location} County Supervisor`, type: 'county_supervisor', cost: '$50,000-$200,000' },
-        { keyword: 'county clerk', title: `${location} County Clerk`, type: 'county_clerk', cost: '$20,000-$100,000' },
-        { keyword: 'sheriff', title: `${location} Sheriff`, type: 'sheriff', cost: '$50,000-$200,000' },
-        { keyword: 'district attorney', title: `${location} District Attorney`, type: 'district_attorney', cost: '$50,000-$200,000' },
-        { keyword: 'water board', title: `${location} Water Board`, type: 'water_board', cost: '$5,000-$30,000' },
-      ];
+
+        const officeTypes = [
+            { keyword: 'mayor', title: `Mayor of ${location}`, type: 'mayor', cost: '$50,000-$500,000' },
+            { keyword: 'city council', title: `${location} City Council`, type: 'city_council', cost: '$10,000-$100,000' },
+            { keyword: 'board of supervisors', title: `${location} Board of Supervisors`, type: 'board_of_supervisors', cost: '$50,000-$200,000' },
+            { keyword: 'school board', title: `${location} School Board`, type: 'school_board', cost: '$5,000-$50,000' },
+            { keyword: 'community college board', title: `${location} Community College Board`, type: 'college_board', cost: '$5,000-$30,000' },
+            { keyword: 'county supervisor', title: `${location} County Supervisor`, type: 'county_supervisor', cost: '$50,000-$200,000' },
+            { keyword: 'county clerk', title: `${location} County Clerk`, type: 'county_clerk', cost: '$20,000-$100,000' },
+            { keyword: 'sheriff', title: `${location} Sheriff`, type: 'sheriff', cost: '$50,000-$200,000' },
+            { keyword: 'district attorney', title: `${location} District Attorney`, type: 'district_attorney', cost: '$50,000-$300,000' },
+            { keyword: 'city attorney', title: `${location} City Attorney`, type: 'city_attorney', cost: '$50,000-$200,000' },
+            { keyword: 'water board', title: `${location} Water Board`, type: 'water_board', cost: '$5,000-$30,000' },
+            { keyword: 'assessor', title: `${location} Assessor-Recorder`, type: 'assessor', cost: '$20,000-$100,000' },
+            { keyword: 'public defender', title: `${location} Public Defender`, type: 'public_defender', cost: '$20,000-$100,000' },
+            { keyword: 'treasurer', title: `${location} Treasurer`, type: 'treasurer', cost: '$20,000-$100,000' },
+            { keyword: 'bart director', title: `BART Board of Directors`, type: 'bart_director', cost: '$10,000-$50,000' },
+            { keyword: 'superior court', title: `${location} Superior Court Judge`, type: 'judge', cost: '$50,000-$200,000' },
+          ];
   
       officeTypes.forEach(({ keyword, title, type, cost }) => {
         if (content.toLowerCase().includes(keyword)) {
