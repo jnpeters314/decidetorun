@@ -405,6 +405,9 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [localRacesMessage, setLocalRacesMessage] = useState(null);
+  const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state);
+setLocalRacesMessage(message);
   const [currentView, setCurrentView] = useState('landing');
 
   const { 
@@ -1253,6 +1256,14 @@ useEffect(() => {
                   <strong>Real FEC Data:</strong> All candidate and finance information is verified from the Federal Election Commission.
                 </p>
               </div>
+              {localRacesMessage && (
+  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 flex items-center gap-3">
+    <Info className="w-5 h-5 text-yellow-600 shrink-0" />
+    <p className="text-sm text-yellow-800">
+      <strong>Local races:</strong> {localRacesMessage}
+    </p>
+  </div>
+)}
             </div>
 
             {/* Office Cards */}
