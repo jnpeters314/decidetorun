@@ -406,8 +406,6 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [localRacesMessage, setLocalRacesMessage] = useState(null);
-  const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state);
-setLocalRacesMessage(message);
   const [currentView, setCurrentView] = useState('landing');
 
   const { 
@@ -652,29 +650,23 @@ useEffect(() => {
   }, [availableOffices, filters]);
 
 
-  const handleWizardNext = async () => {
-    if (wizardStep === 2) {
-      setLoading(true);
-      try {
-        // Existing federal races from Supabase
-        const offices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
-        
-        // Local races from Ballotpedia
-        const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state);
-        
-        // Merge and set
-        setAvailableOffices([...localOffices, ...offices]);
-        if (message) console.info('Ballotpedia:', message);
-        
-        setBrowseMode(false);
-        setCurrentView('results');
-      } finally {
-        setLoading(false);
+ const handleWizardNext = async () => {
+      if (wizardStep === 2) {
+        setLoading(true);
+        try {
+          const offices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
+          const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state);
+          setLocalRacesMessage(message);
+          setAvailableOffices([...localOffices, ...offices]);
+          setBrowseMode(false);
+          setCurrentView('results');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setWizardStep(wizardStep + 1);
       }
-    } else {
-      setWizardStep(wizardStep + 1);
-    }
-  };
+    };
 
   const handleBrowseState = async (state) => {
     setLoading(true);
