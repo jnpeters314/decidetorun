@@ -11,6 +11,7 @@ import { LoginModal } from './components/LoginModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
+  import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
 
 // State names mapping
 const STATE_NAMES = {
@@ -401,8 +402,9 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
 };
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [currentView, setCurrentView] = useState('landing');
 
   const { 
     user, 
@@ -413,7 +415,6 @@ function App() {
     saveCampaignPlan,
     loadCampaignPlan
   } = useAuth();
-  const [currentView, setCurrentView] = useState('landing');
   const [loading, setLoading] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -455,6 +456,15 @@ function App() {
   const [browseMode, setBrowseMode] = useState(false);
   const [browseState, setBrowseState] = useState('');
   const [availableStates, setAvailableStates] = useState([]);
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+    navigate(`/${view === 'landing' ? '' : view}`);
+  };
+
+  useEffect(() => {
+    const path = location.pathname.slice(1) || 'landing';
+    handleViewChange(path);
+  }, [location]);
 
   // Load available states and saved offices on mount
   useEffect(() => {
@@ -745,42 +755,6 @@ useEffect(() => {
       partyCount
     };
   };
-
-  // PASSWORD PROTECTION
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-          <Flag className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">Decide to Run</h1>
-          <p className="text-gray-600 mb-6 text-center">Private Beta - Enter password to continue</p>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            if (password === 'decidetorun2026') {
-              setIsAuthenticated(true);
-            } else {
-              alert('Incorrect password');
-            }
-          }}>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-            <button 
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
-            >
-              Access Beta
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   // Landing Page
   if (currentView === 'landing') {
@@ -1957,4 +1931,12 @@ if (currentView === 'chatbot') {
 return null;
 }
 
-export default App;
+function AppWithRouter() {
+  return (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  );
+}
+
+export default AppWithRouter;
