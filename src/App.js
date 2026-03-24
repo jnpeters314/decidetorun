@@ -47,7 +47,9 @@ const simulatedBackend = {
     const { data, error } = await supabase
       .from('offices')
       .select('state')
-      .order('state');
+      .order('state')
+      .limit(1000); 
+
     
     if (error) {
       console.error('Error fetching states:', error);
