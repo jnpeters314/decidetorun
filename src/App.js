@@ -45,18 +45,14 @@ const simulatedBackend = {
   
   getAllStates: async () => {
     const { data, error } = await supabase
-      .from('offices')
-      .select('state')
-      .order('state')
-      .limit(7500);
+      .rpc('get_distinct_states');
     
     if (error) {
       console.error('Error fetching states:', error);
       return [];
     }
     
-    const uniqueStates = [...new Set(data.map(item => item.state))];
-    return uniqueStates;
+    return data.map(item => item.state);
   },
   
   getOfficesByState: async (state) => {
