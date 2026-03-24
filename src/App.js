@@ -12,6 +12,7 @@ import { LoginModal } from './components/LoginModal';
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
   import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
+  import { fetchLocalRaces } from './utils/ballotpedia';
 
 // State names mapping
 const STATE_NAMES = {
@@ -435,6 +436,7 @@ function App() {
   
   const [userProfile, setUserProfile] = useState({
     zipCode: '',
+    city: '',   // add this
     state: '',
     age: '',
     citizenship: true,
@@ -646,12 +648,21 @@ useEffect(() => {
     setFilteredOffices(filtered);
   }, [availableOffices, filters]);
 
+
   const handleWizardNext = async () => {
     if (wizardStep === 2) {
       setLoading(true);
       try {
+        // Existing federal races from Supabase
         const offices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
-        setAvailableOffices(offices);
+        
+        // Local races from Ballotpedia
+        const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state);
+        
+        // Merge and set
+        setAvailableOffices([...localOffices, ...offices]);
+        if (message) console.info('Ballotpedia:', message);
+        
         setBrowseMode(false);
         setCurrentView('results');
       } finally {
@@ -913,6 +924,16 @@ useEffect(() => {
                 maxLength={5}
               />
             </div>
+            <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+  <input
+    type="text"
+    value={userProfile.city}
+    onChange={(e) => setUserProfile({...userProfile, city: e.target.value})}
+    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+    placeholder="San Jose"
+  />
+</div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
               <select
