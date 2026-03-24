@@ -11,7 +11,6 @@ import { LoginModal } from './components/LoginModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
-  import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
   import { fetchLocalRaces } from './utils/ballotpedia';
 
 // State names mapping
@@ -403,8 +402,6 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
 };
 
 function App() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [localRacesMessage, setLocalRacesMessage] = useState(null);
   const [currentView, setCurrentView] = useState('landing');
 
@@ -459,18 +456,6 @@ function App() {
   const [browseMode, setBrowseMode] = useState(false);
   const [browseState, setBrowseState] = useState('');
   const [availableStates, setAvailableStates] = useState([]);
-  const handleViewChange = (view) => {
-    setCurrentView(view);
-  };
-
-  // Load available states and saved offices on mount
-  useEffect(() => {
-    const loadStates = async () => {
-      const states = await simulatedBackend.getAllStates();
-      setAvailableStates(states);
-    };
-    loadStates();
-  }, []);
 
 // Load saved campaign plan when selectedOffice changes
 useEffect(() => {
@@ -1949,12 +1934,4 @@ if (currentView === 'chatbot') {
 return null;
 }
 
-function AppWithRouter() {
-  return (
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  );
-}
-
-export default AppWithRouter;
+export default App;
