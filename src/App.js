@@ -637,7 +637,7 @@ useEffect(() => {
         setLoading(true);
         try {
           const offices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
-          const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state);
+          const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state, userProfile.zipCode);
           setLocalRacesMessage(message);
           setAvailableOffices([...localOffices, ...offices]);
           setBrowseMode(false);
