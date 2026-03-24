@@ -456,7 +456,13 @@ function App() {
   const [browseMode, setBrowseMode] = useState(false);
   const [browseState, setBrowseState] = useState('');
   const [availableStates, setAvailableStates] = useState([]);
-
+  useEffect(() => {
+    const loadStates = async () => {
+      const states = await simulatedBackend.getAllStates();
+      setAvailableStates(states);
+    };
+    loadStates();
+  }, []);
 // Load saved campaign plan when selectedOffice changes
 useEffect(() => {
   const loadSavedPlan = async () => {
@@ -1924,7 +1930,7 @@ if (currentView === 'chatbot') {
         </div>
       </div>
       <LoginModal 
-        isOpen={showLoginModal} 
+        isOpen={showLoginModal} loadStates
         onClose={() => setShowLoginModal(false)}
       />
     </div>
