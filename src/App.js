@@ -461,13 +461,7 @@ function App() {
   const [availableStates, setAvailableStates] = useState([]);
   const handleViewChange = (view) => {
     setCurrentView(view);
-    navigate(`/${view === 'landing' ? '' : view}`);
   };
-
-  useEffect(() => {
-    const path = location.pathname.slice(1) || 'landing';
-    handleViewChange(path);
-  }, [location]);
 
   // Load available states and saved offices on mount
   useEffect(() => {
