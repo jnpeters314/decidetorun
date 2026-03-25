@@ -302,7 +302,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
   if (currentView === 'landing') return null;
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+    <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#0a2351' }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Breadcrumbs */}
@@ -311,44 +311,38 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
               onClick={() => onNavigate('landing')}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <Flag className="w-6 h-6 text-blue-600" />
-              <span className="font-bold text-lg text-gray-900 hidden sm:inline">Decide to Run</span>
+              <Flag className="w-6 h-6 text-white" />
+              <span className="font-bold text-lg text-white hidden sm:inline">Decide to Run</span>
             </button>
-            
+
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-sm">
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-blue-300" />
               {currentView === 'wizard' && (
-                <span className="text-gray-600">Find Offices</span>
+                <span className="text-blue-200">Find Offices</span>
               )}
               {currentView === 'browse' && (
-                <span className="text-gray-600">Browse States</span>
+                <span className="text-blue-200">Browse States</span>
               )}
               {currentView === 'results' && (
-                <span className="text-gray-900 font-medium">Office Results</span>
+                <span className="text-white font-medium">Office Results</span>
               )}
               {currentView === 'planToRun' && (
                 <>
-                  <button
-                    onClick={() => onNavigate('results')}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
+                  <button onClick={() => onNavigate('results')} className="text-blue-300 hover:text-white transition-colors">
                     Results
                   </button>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-900 font-medium">Campaign Plan</span>
+                  <ChevronRight className="w-4 h-4 text-blue-300" />
+                  <span className="text-white font-medium">Campaign Plan</span>
                 </>
               )}
               {currentView === 'chatbot' && (
                 <>
-                  <button
-                    onClick={() => onNavigate('results')}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
+                  <button onClick={() => onNavigate('results')} className="text-blue-300 hover:text-white transition-colors">
                     Results
                   </button>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-900 font-medium">Q&A Assistant</span>
+                  <ChevronRight className="w-4 h-4 text-blue-300" />
+                  <span className="text-white font-medium">Eleanor</span>
                 </>
               )}
             </div>
@@ -359,33 +353,33 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
             {currentView !== 'results' && currentView !== 'browse' && (
               <button
                 onClick={() => onNavigate('browse')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-blue-200 hover:text-white transition-colors"
               >
                 <Building className="w-4 h-4" />
                 <span className="text-sm font-medium">Browse States</span>
               </button>
             )}
-            
+
             {currentView !== 'chatbot' && (
               <button
                 onClick={() => onNavigate('chatbot')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors"
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-blue-200 hover:text-white transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">Ask Questions</span>
+                <span className="text-sm font-medium">Ask Eleanor</span>
               </button>
             )}
 
             {user ? (
-              <UserMenu 
-                user={user} 
+              <UserMenu
+                user={user}
                 onSignOut={onSignOut}
                 onViewSaved={onViewSaved}
               />
             ) : (
               <button
                 onClick={onShowLogin}
-                className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-700 font-medium border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-white font-medium border border-blue-300 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors"
               >
                 <LogIn className="w-4 h-4" />
                 <span className="hidden sm:inline">Sign In</span>
@@ -747,82 +741,194 @@ useEffect(() => {
   // Landing Page
   if (currentView === 'landing') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        {/* Header with Login */}
-        <div className="max-w-4xl mx-auto px-4 pt-8">
-          <div className="flex justify-end">
+      <div className="min-h-screen bg-gray-100">
+        {/* Top nav bar */}
+        <div style={{ backgroundColor: '#0a2351' }}>
+          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Flag className="w-6 h-6 text-white" />
+              <span className="font-bold text-xl text-white tracking-tight">Decide to Run</span>
+            </div>
             {user ? (
-              <UserMenu 
-                user={user} 
-                onSignOut={signOut}
-                onViewSaved={handleViewSavedOffices}
-              />
+              <UserMenu user={user} onSignOut={signOut} onViewSaved={handleViewSavedOffices} />
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
+                className="flex items-center gap-2 px-4 py-2 text-white font-medium border border-blue-300 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors text-sm"
               >
-                <LogIn className="w-5 h-5" />
+                <LogIn className="w-4 h-4" />
                 Sign In
               </button>
             )}
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 mb-6">
-              <Flag className="w-12 h-12 text-blue-600" />
-              <h1 className="text-5xl font-bold text-gray-900">Decide to Run</h1>
-            </div>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover what offices you can run for in your area and get the information you need to launch your campaign.
-            </p>
-          </div>
+        {/* Hero */}
+        <div className="max-w-6xl mx-auto px-6 pt-14 pb-8 text-center">
+          <h1 className="text-5xl font-bold mb-4" style={{ color: '#0a2351' }}>Decide to Run</h1>
+          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+            Discover offices you can run for and get everything you need to launch your campaign.
+          </p>
+        </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Get Started</h2>
-            
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="text-center p-6 bg-blue-50 rounded-xl">
-                <MapPin className="w-10 h-10 text-blue-600 mx-auto mb-3" />
-                <h3 className="font-semibold text-gray-900 mb-2">Find Offices</h3>
-                <p className="text-sm text-gray-600">See every elected position available in your area</p>
-              </div>
-              
-              <div className="text-center p-6 bg-indigo-50 rounded-xl">
-                <Building className="w-10 h-10 text-indigo-600 mx-auto mb-3" />
-                <h3 className="font-semibold text-gray-900 mb-2">Get Answers</h3>
-                <p className="text-sm text-gray-600">Learn filing requirements, costs, and deadlines</p>
-              </div>
-              
-              <div className="text-center p-6 bg-purple-50 rounded-xl">
-                <User className="w-10 h-10 text-purple-600 mx-auto mb-3" />
-                <h3 className="font-semibold text-gray-900 mb-2">Launch Your Campaign</h3>
-                <p className="text-sm text-gray-600">Connect to resources to start running</p>
-              </div>
-            </div>
+        {/* Section label */}
+        <div className="max-w-6xl mx-auto px-6 mb-6 flex items-center gap-4">
+          <div className="flex-1 h-px bg-gray-300" />
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">How would you like to get started?</p>
+          <div className="flex-1 h-px bg-gray-300" />
+        </div>
 
-            <button
-              onClick={() => setCurrentView('wizard')}
-              className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mb-4"
-            >
-              Begin Your Journey
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            
-            <div className="text-center">
+        {/* Two cards */}
+        <div className="max-w-6xl mx-auto px-6 pb-12">
+          <div className="relative grid md:grid-cols-2 gap-8 items-stretch">
+
+            {/* Left: Find an Office */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col gap-6 h-full">
+              <div>
+                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-4 text-white" style={{ backgroundColor: '#e8572a' }}>
+                  I know what I want
+                </span>
+                <h2 className="text-2xl font-bold mb-3" style={{ color: '#0a2351' }}>Find an Office to Run For</h2>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  Search by your zip code or city to see every elected position available near you — with filing deadlines, eligibility requirements, estimated costs, and a personalized campaign plan.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fde8df' }}>
+                    <MapPin className="w-4 h-4" style={{ color: '#e8572a' }} />
+                  </span>
+                  Search by zip code to find offices near you
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fde8df' }}>
+                    <Calendar className="w-4 h-4" style={{ color: '#e8572a' }} />
+                  </span>
+                  See filing deadlines and eligibility requirements
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fde8df' }}>
+                    <TrendingUp className="w-4 h-4" style={{ color: '#e8572a' }} />
+                  </span>
+                  Get a personalized campaign plan
+                </div>
+              </div>
+
               <button
-                onClick={() => setCurrentView('browse')}
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                onClick={() => setCurrentView('wizard')}
+                className="w-full text-white py-4 px-6 rounded-xl font-bold text-base hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-auto"
+                style={{ backgroundColor: '#0a2351' }}
               >
-                Or browse offices by state →
+                Search by Location
+                <ArrowRight className="w-5 h-5" />
               </button>
+
+              <div className="text-center -mt-2">
+                <button
+                  onClick={() => setCurrentView('browse')}
+                  className="font-medium text-sm hover:underline"
+                  style={{ color: '#0a2351' }}
+                >
+                  Or browse offices by state →
+                </button>
+              </div>
             </div>
+
+            {/* OR pill */}
+            <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <span className="bg-white border-2 border-gray-200 text-gray-400 font-semibold text-xs rounded-full w-10 h-10 flex items-center justify-center shadow-sm">or</span>
+            </div>
+
+            {/* OR divider mobile */}
+            <div className="flex md:hidden items-center gap-4">
+              <div className="flex-1 h-px bg-gray-300" />
+              <span className="text-sm font-medium text-gray-400">or</span>
+              <div className="flex-1 h-px bg-gray-300" />
+            </div>
+
+            {/* Right: Eleanor */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+              <div className="p-6" style={{ backgroundColor: '#0a2351' }}>
+                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 text-white" style={{ backgroundColor: '#e8572a' }}>
+                  I'm not sure where to start
+                </span>
+                <div className="flex items-start gap-3 text-white">
+                  <span className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                    <MessageCircle className="w-5 h-5 text-white" />
+                  </span>
+                  <div>
+                    <h2 className="text-xl font-bold">Ask Eleanor</h2>
+                    <p className="text-blue-200 text-sm mt-1">Not sure what office to run for, or whether you're eligible? Eleanor can walk you through requirements, deadlines, costs, and next steps — just ask.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-64 overflow-y-auto p-5 space-y-3 bg-gray-50">
+                {chatMessages.length === 0 ? (
+                  <div className="py-2">
+                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">Try asking:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['Campaign costs', 'Fundraising strategies', 'Filing requirements', 'Hiring staff'].map((topic, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setChatInput(`Tell me about ${topic.toLowerCase()}`)}
+                          className="bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left shadow-sm"
+                        >
+                          {topic}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  chatMessages.map((msg, idx) => (
+                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs rounded-xl px-4 py-2.5 text-sm ${msg.role === 'user' ? 'text-white' : 'bg-white border border-gray-200 text-gray-800 shadow-sm'}`}
+                        style={msg.role === 'user' ? { backgroundColor: '#0a2351' } : {}}>
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+                {chatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex gap-1.5 shadow-sm">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-gray-200 p-4 bg-white mt-auto">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendChatMessage()}
+                    placeholder="Ask Eleanor a question..."
+                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none text-sm bg-gray-50"
+                    style={{ '--tw-ring-color': '#0a2351' }}
+                    disabled={chatLoading}
+                  />
+                  <button
+                    onClick={handleSendChatMessage}
+                    disabled={chatLoading || !chatInput.trim()}
+                    className="text-white px-4 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center"
+                    style={{ backgroundColor: '#0a2351' }}
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <div className="text-center text-sm text-gray-500">
-            <p>Free to use • Covers all 50 states • Real FEC data</p>
+          <div className="text-center mt-8 text-xs text-gray-400">
+            Free to use · Covers all 50 states · Real FEC data
           </div>
         </div>
       </div>
@@ -1081,7 +1187,7 @@ useEffect(() => {
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
                 >
                   <MessageCircle className="w-5 h-5" />
-                  Ask Questions
+                  Ask Eleanor
                 </button>
               </div>
 
@@ -1853,8 +1959,8 @@ if (currentView === 'chatbot') {
             <div className="flex items-center gap-3 text-white">
               <MessageCircle className="w-10 h-10" />
               <div>
-                <h1 className="text-2xl font-bold">Campaign Q&A Assistant</h1>
-                <p className="text-blue-100">Ask me anything about running for office</p>
+                <h1 className="text-2xl font-bold">Eleanor</h1>
+                <p className="text-blue-100">Your campaign guide — ask me anything about running for office</p>
               </div>
             </div>
           </div>
