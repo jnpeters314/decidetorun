@@ -669,27 +669,49 @@ useEffect(() => {
 
   const handleSendChatMessage = async () => {
     if (!chatInput.trim()) return;
-    
+
     const userMessage = {
       role: 'user',
       content: chatInput
     };
-    
-    setChatMessages([...chatMessages, userMessage]);
+
+    const updatedMessages = [...chatMessages, userMessage];
+    setChatMessages(updatedMessages);
     setChatInput('');
     setChatLoading(true);
-    
+
     try {
-      const response = await simulatedBackend.chatbot(chatInput);
-      
+      const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+      const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/eleanor-chat`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
+          }),
+        }
+      );
+
+      const data = await response.json();
+      const assistantText = data?.content?.[0]?.text ?? "Sorry, I couldn't get a response. Please try again.";
+
       const assistantMessage = {
         role: 'assistant',
-        content: response.message,
-        confidence: response.confidence,
-        relatedQuestions: response.relatedQuestions
+        content: assistantText,
       };
-      
+
       setChatMessages(prev => [...prev, assistantMessage]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "Sorry, something went wrong. Please try again.",
+      }]);
     } finally {
       setChatLoading(false);
     }
