@@ -44,33 +44,28 @@ export const cityToPageTitle = (city, state) => {
     return `${city.trim().replace(/ /g, '_')},_${stateName.replace(/ /g, '_')}`;
   };
   
-  // Look up congressional and state legislative districts from lat/lng using Census Geocoder
+  // Look up congressional and state legislative districts via Supabase edge function
+  // (proxies Census Geocoder server-side to avoid CORS restrictions)
   export const getDistrictsFromLatLng = async (lat, lng) => {
     try {
-      const res = await fetch(
-        `https://geocoding.geo.census.gov/geocoder/geographies/coordinates?x=${lng}&y=${lat}&benchmark=Public_AR_Current&vintage=Census2020_Current&layers=54,56,58&format=json`
-      );
+      const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+      const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+      const res = await fetch(`${supabaseUrl}/functions/v1/get-districts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ lat, lng }),
+      });
       const data = await res.json();
-      const geos = data?.result?.geographies ?? {};
-
-      const cdKey = Object.keys(geos).find(k => k.toLowerCase().includes('congressional'));
-      const congressionalDistrict = cdKey && geos[cdKey][0]
-        ? parseInt(geos[cdKey][0].DISTRICT || geos[cdKey][0].BASENAME, 10)
-        : null;
-
-      const senateKey = Object.keys(geos).find(k => k.toLowerCase().includes('upper'));
-      const stateSenateDistrict = senateKey && geos[senateKey][0]
-        ? parseInt(geos[senateKey][0].DISTRICT || geos[senateKey][0].BASENAME, 10)
-        : null;
-
-      const houseKey = Object.keys(geos).find(k => k.toLowerCase().includes('lower'));
-      const stateHouseDistrict = houseKey && geos[houseKey][0]
-        ? parseInt(geos[houseKey][0].DISTRICT || geos[houseKey][0].BASENAME, 10)
-        : null;
-
-      return { congressionalDistrict, stateSenateDistrict, stateHouseDistrict };
+      return {
+        congressionalDistrict: typeof data.congressionalDistrict === 'number' ? data.congressionalDistrict : null,
+        stateSenateDistrict: typeof data.stateSenateDistrict === 'number' ? data.stateSenateDistrict : null,
+        stateHouseDistrict: typeof data.stateHouseDistrict === 'number' ? data.stateHouseDistrict : null,
+      };
     } catch (error) {
-      console.error('Census district lookup error:', error);
+      console.error('District lookup error:', error);
       return { congressionalDistrict: null, stateSenateDistrict: null, stateHouseDistrict: null };
     }
   };
