@@ -11,7 +11,7 @@ import { LoginModal } from './components/LoginModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
-  import { fetchLocalRaces } from './utils/ballotpedia';
+  import { fetchLocalRaces, fetchStatewideRaces } from './utils/ballotpedia';
 
 // State names mapping
 const STATE_NAMES = {
@@ -632,8 +632,9 @@ useEffect(() => {
         try {
           const offices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
           const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state, userProfile.zipCode);
+          const statewideOffices = await fetchStatewideRaces(userProfile.state);
           setLocalRacesMessage(message);
-          setAvailableOffices([...localOffices, ...offices]);
+          setAvailableOffices([...localOffices, ...statewideOffices, ...offices]);
           setBrowseMode(false);
           setCurrentView('results');
         } finally {
@@ -648,8 +649,11 @@ useEffect(() => {
     setLoading(true);
     setBrowseState(state);
     try {
-      const offices = await simulatedBackend.getOfficesByState(state);
-      setAvailableOffices(offices);
+      const [offices, statewideOffices] = await Promise.all([
+        simulatedBackend.getOfficesByState(state),
+        fetchStatewideRaces(state),
+      ]);
+      setAvailableOffices([...statewideOffices, ...offices]);
       setBrowseMode(true);
       setCurrentView('results');
     } finally {

@@ -1,3 +1,31 @@
+const STATE_FULL_NAMES = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+};
+
+const STATEWIDE_OFFICE_TYPES = [
+  { keyword: 'governor', title: (s) => `Governor of ${STATE_FULL_NAMES[s] || s}`, type: 'governor', cost: '$5,000,000-$50,000,000' },
+  { keyword: 'lieutenant governor', title: (s) => `Lieutenant Governor of ${STATE_FULL_NAMES[s] || s}`, type: 'lt_governor', cost: '$500,000-$5,000,000' },
+  { keyword: 'secretary of state', title: (s) => `Secretary of State of ${STATE_FULL_NAMES[s] || s}`, type: 'secretary_of_state', cost: '$500,000-$5,000,000' },
+  { keyword: 'attorney general', title: (s) => `Attorney General of ${STATE_FULL_NAMES[s] || s}`, type: 'attorney_general', cost: '$1,000,000-$10,000,000' },
+  { keyword: 'state treasurer', title: (s) => `State Treasurer of ${STATE_FULL_NAMES[s] || s}`, type: 'state_treasurer', cost: '$300,000-$3,000,000' },
+  { keyword: 'state comptroller', title: (s) => `State Comptroller of ${STATE_FULL_NAMES[s] || s}`, type: 'state_comptroller', cost: '$300,000-$3,000,000' },
+  { keyword: 'state controller', title: (s) => `State Controller of ${STATE_FULL_NAMES[s] || s}`, type: 'state_controller', cost: '$300,000-$3,000,000' },
+  { keyword: 'state auditor', title: (s) => `State Auditor of ${STATE_FULL_NAMES[s] || s}`, type: 'state_auditor', cost: '$200,000-$2,000,000' },
+  { keyword: 'superintendent of public instruction', title: (s) => `Superintendent of Public Instruction of ${STATE_FULL_NAMES[s] || s}`, type: 'superintendent', cost: '$300,000-$3,000,000' },
+  { keyword: 'insurance commissioner', title: (s) => `Insurance Commissioner of ${STATE_FULL_NAMES[s] || s}`, type: 'insurance_commissioner', cost: '$300,000-$2,000,000' },
+  { keyword: 'commissioner of agriculture', title: (s) => `Commissioner of Agriculture of ${STATE_FULL_NAMES[s] || s}`, type: 'ag_commissioner', cost: '$200,000-$2,000,000' },
+  { keyword: 'labor commissioner', title: (s) => `Labor Commissioner of ${STATE_FULL_NAMES[s] || s}`, type: 'labor_commissioner', cost: '$200,000-$2,000,000' },
+];
+
 // Convert city + state to Ballotpedia page title format
 export const cityToPageTitle = (city, state) => {
     const stateNames = {
@@ -195,3 +223,77 @@ export const cityToPageTitle = (city, state) => {
     confidence: 'medium',
     data_source: 'Ballotpedia',
   });
+
+// Parse statewide offices from wikitext
+const parseStatewideFromWikitext = (wikitext, state) => {
+  const offices = [];
+  const currentYear = new Date().getFullYear();
+  const yearSections = wikitext.split(/===(\d{4})===/);
+
+  for (let i = 1; i < yearSections.length; i += 2) {
+    const year = parseInt(yearSections[i]);
+    const content = yearSections[i + 1];
+    if (year < currentYear) continue;
+
+    const electionDateMatch = content.match(/start=(\d{2}\/\d{2}\/\d{4})/);
+    const electionDate = electionDateMatch
+      ? new Date(electionDateMatch[1]).toISOString().split('T')[0]
+      : `${year}-11-03`;
+
+    const filingMatch = content.match(/filing deadline.*?start=(\d{2}\/\d{2}\/\d{4})/i);
+    const filingDeadline = filingMatch
+      ? new Date(filingMatch[1]).toISOString().split('T')[0]
+      : `${year}-03-01`;
+
+    STATEWIDE_OFFICE_TYPES.forEach(({ keyword, title, type, cost }) => {
+      if (content.toLowerCase().includes(keyword)) {
+        offices.push({
+          id: `state-${type}-${state}`.toLowerCase(),
+          title: title(state),
+          level: 'state',
+          state,
+          district: STATE_FULL_NAMES[state] || state,
+          office_type: type,
+          next_election: electionDate,
+          filing_deadline: filingDeadline,
+          incumbent: 'See Ballotpedia',
+          estimated_cost: cost,
+          total_candidates: 0,
+          candidates_running: [],
+          confidence: 'medium',
+          data_source: 'Ballotpedia',
+        });
+      }
+    });
+  }
+
+  return offices;
+};
+
+// Fetch statewide offices for a given state from Ballotpedia
+export const fetchStatewideRaces = async (state) => {
+  const stateName = (STATE_FULL_NAMES[state] || state).replace(/ /g, '_');
+  try {
+    const sectionsRes = await fetch(
+      `https://ballotpedia.org/wiki/api.php?action=parse&page=${stateName}&prop=sections&format=json&origin=*`
+    );
+    const sectionsData = await sectionsRes.json();
+
+    if (sectionsData.error || !sectionsData.parse) return [];
+
+    const sections = sectionsData.parse.sections;
+    const electionsSection = sections.find(s => s.line === 'Elections');
+    if (!electionsSection) return [];
+
+    const contentRes = await fetch(
+      `https://ballotpedia.org/wiki/api.php?action=parse&page=${stateName}&section=${electionsSection.index}&prop=wikitext&format=json&origin=*`
+    );
+    const contentData = await contentRes.json();
+    const wikitext = contentData.parse.wikitext['*'];
+
+    return parseStatewideFromWikitext(wikitext, state);
+  } catch (error) {
+    console.error(`Ballotpedia statewide fetch error for ${state}:`, error);
+    return [];
+  }
+};
