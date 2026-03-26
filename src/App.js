@@ -11,7 +11,7 @@ import { LoginModal } from './components/LoginModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
-  import { fetchLocalRaces, fetchStatewideRaces } from './utils/ballotpedia';
+  import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng } from './utils/ballotpedia';
 
 // State names mapping
 const STATE_NAMES = {
@@ -425,11 +425,14 @@ function App() {
   
   const [userProfile, setUserProfile] = useState({
     zipCode: '',
-    city: '',   // add this
+    city: '',
     state: '',
     age: '',
     citizenship: true,
-    residency: true
+    residency: true,
+    congressionalDistrict: undefined,
+    stateSenateDistrict: undefined,
+    stateHouseDistrict: undefined,
   });
   const [availableOffices, setAvailableOffices] = useState([]);
   const [filteredOffices, setFilteredOffices] = useState([]);
@@ -587,11 +590,43 @@ useEffect(() => {
   // Filter offices
   useEffect(() => {
     let filtered = [...availableOffices];
-    
+
+    // Eligibility filters (wizard mode only, not browse mode)
+    if (!browseMode) {
+      // Age filter
+      if (userProfile.age) {
+        filtered = filtered.filter(office => !office.min_age || office.min_age <= userProfile.age);
+      }
+
+      // District filter — only applies when we successfully resolved the user's districts
+      if (typeof userProfile.congressionalDistrict === 'number') {
+        filtered = filtered.filter(office => {
+          if (office.level === 'statewide' || office.level === 'local') return true;
+          if (office.level === 'federal') {
+            if (office.office_type === 'senate') return true;
+            return parseInt(office.district, 10) === userProfile.congressionalDistrict;
+          }
+          if (office.level === 'state') {
+            const titleLower = (office.title || '').toLowerCase();
+            const typeLower = (office.office_type || '').toLowerCase();
+            const isStateSenate = titleLower.includes('senate') || typeLower.includes('senate');
+            if (isStateSenate) {
+              if (typeof userProfile.stateSenateDistrict !== 'number') return true;
+              return parseInt(office.district, 10) === userProfile.stateSenateDistrict;
+            } else {
+              if (typeof userProfile.stateHouseDistrict !== 'number') return true;
+              return parseInt(office.district, 10) === userProfile.stateHouseDistrict;
+            }
+          }
+          return true;
+        });
+      }
+    }
+
     if (filters.level !== 'all') {
       filtered = filtered.filter(office => office.level === filters.level);
     }
-    
+
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
       filtered = filtered.filter(office => 
@@ -623,16 +658,26 @@ useEffect(() => {
     }
     
     setFilteredOffices(filtered);
-  }, [availableOffices, filters]);
+  }, [availableOffices, filters, browseMode, userProfile]);
 
 
  const handleWizardNext = async () => {
       if (wizardStep === 2) {
         setLoading(true);
         try {
-          const offices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
-          const { offices: localOffices, message } = await fetchLocalRaces(userProfile.city, userProfile.state, userProfile.zipCode);
-          const statewideOffices = await fetchStatewideRaces(userProfile.state);
+          const [zipData, offices, { offices: localOffices, message }, statewideOffices] = await Promise.all([
+            getCityFromZip(userProfile.zipCode),
+            simulatedBackend.getOffices(userProfile.zipCode, userProfile.state),
+            fetchLocalRaces(userProfile.city, userProfile.state, userProfile.zipCode),
+            fetchStatewideRaces(userProfile.state),
+          ]);
+
+          // Look up congressional and state legislative districts from zip coordinates
+          if (zipData?.lat && zipData?.lng) {
+            const districts = await getDistrictsFromLatLng(zipData.lat, zipData.lng);
+            setUserProfile(prev => ({ ...prev, ...districts }));
+          }
+
           setLocalRacesMessage(message);
           setAvailableOffices([...localOffices, ...statewideOffices, ...offices]);
           setBrowseMode(false);

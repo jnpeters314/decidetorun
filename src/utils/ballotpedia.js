@@ -44,6 +44,37 @@ export const cityToPageTitle = (city, state) => {
     return `${city.trim().replace(/ /g, '_')},_${stateName.replace(/ /g, '_')}`;
   };
   
+  // Look up congressional and state legislative districts from lat/lng using Census Geocoder
+  export const getDistrictsFromLatLng = async (lat, lng) => {
+    try {
+      const res = await fetch(
+        `https://geocoding.geo.census.gov/geocoder/geographies/coordinates?x=${lng}&y=${lat}&benchmark=Public_AR_Current&vintage=Census2020_Current&layers=54,56,58&format=json`
+      );
+      const data = await res.json();
+      const geos = data?.result?.geographies ?? {};
+
+      const cdKey = Object.keys(geos).find(k => k.toLowerCase().includes('congressional'));
+      const congressionalDistrict = cdKey && geos[cdKey][0]
+        ? parseInt(geos[cdKey][0].DISTRICT || geos[cdKey][0].BASENAME, 10)
+        : null;
+
+      const senateKey = Object.keys(geos).find(k => k.toLowerCase().includes('upper'));
+      const stateSenateDistrict = senateKey && geos[senateKey][0]
+        ? parseInt(geos[senateKey][0].DISTRICT || geos[senateKey][0].BASENAME, 10)
+        : null;
+
+      const houseKey = Object.keys(geos).find(k => k.toLowerCase().includes('lower'));
+      const stateHouseDistrict = houseKey && geos[houseKey][0]
+        ? parseInt(geos[houseKey][0].DISTRICT || geos[houseKey][0].BASENAME, 10)
+        : null;
+
+      return { congressionalDistrict, stateSenateDistrict, stateHouseDistrict };
+    } catch (error) {
+      console.error('Census district lookup error:', error);
+      return { congressionalDistrict: null, stateSenateDistrict: null, stateHouseDistrict: null };
+    }
+  };
+
   // Look up county from lat/long using FCC API
   export const getCountyFromLatLng = async (lat, lng) => {
     try {
