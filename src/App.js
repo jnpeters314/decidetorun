@@ -1312,6 +1312,29 @@ useEffect(() => {
                 )}
               </div>
 
+              {/* Level Filter */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {[
+                  { label: 'All Offices', value: 'all' },
+                  { label: 'Federal', value: 'federal' },
+                  { label: 'Statewide', value: 'state' },
+                  { label: 'Local', value: 'local' },
+                ].map(({ label, value }) => (
+                  <button
+                    key={value}
+                    onClick={() => setFilters({ ...filters, level: value })}
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                      filters.level === value
+                        ? 'text-white border-transparent'
+                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                    }`}
+                    style={filters.level === value ? { backgroundColor: '#0a2351', borderColor: '#0a2351' } : {}}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
               {/* Filters */}
               <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                 <input
