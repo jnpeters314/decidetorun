@@ -248,9 +248,9 @@ const parseStatewideFromWikitext = (wikitext, state) => {
     STATEWIDE_OFFICE_TYPES.forEach(({ keyword, title, type, cost }) => {
       if (content.toLowerCase().includes(keyword)) {
         offices.push({
-          id: `state-${type}-${state}`.toLowerCase(),
+          id: `statewide-${type}-${state}`.toLowerCase(),
           title: title(state),
-          level: 'state',
+          level: 'statewide',
           state,
           district: STATE_FULL_NAMES[state] || state,
           office_type: type,

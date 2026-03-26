@@ -1321,7 +1321,8 @@ useEffect(() => {
                 {[
                   { label: 'All Offices', value: 'all' },
                   { label: 'Federal', value: 'federal' },
-                  { label: 'Statewide', value: 'state' },
+                  { label: 'Statewide', value: 'statewide' },
+                  { label: 'State Legislature', value: 'state' },
                   { label: 'Local', value: 'local' },
                 ].map(({ label, value }) => (
                   <button
@@ -1408,6 +1409,7 @@ useEffect(() => {
                           <h3 className="text-xl font-semibold text-gray-900">{office.title}</h3>
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                             office.level === 'federal' ? 'bg-purple-100 text-purple-700' :
+                            office.level === 'statewide' ? 'bg-indigo-100 text-indigo-700' :
                             office.level === 'state' ? 'bg-blue-100 text-blue-700' :
                             'bg-green-100 text-green-700'
                           }`}>
