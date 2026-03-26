@@ -593,6 +593,7 @@ useEffect(() => {
 
     // Eligibility filters (wizard mode only, not browse mode)
     if (!browseMode) {
+      console.log('[DEBUG] filter: congressionalDistrict =', userProfile.congressionalDistrict, '| stateSenate =', userProfile.stateSenateDistrict, '| stateHouse =', userProfile.stateHouseDistrict);
       // Age filter
       if (userProfile.age) {
         filtered = filtered.filter(office => !office.min_age || office.min_age <= userProfile.age);
@@ -675,8 +676,14 @@ useEffect(() => {
           // Look up congressional and state legislative districts from zip coordinates
           if (zipData?.lat && zipData?.lng) {
             const districts = await getDistrictsFromLatLng(zipData.lat, zipData.lng);
+            console.log('[DEBUG] zip coords:', zipData.lat, zipData.lng);
+            console.log('[DEBUG] districts returned:', districts);
             setUserProfile(prev => ({ ...prev, ...districts }));
+          } else {
+            console.log('[DEBUG] no lat/lng from zip lookup, zipData:', zipData);
           }
+
+          console.log('[DEBUG] offices sample (first 3):', [...localOffices, ...statewideOffices, ...offices].slice(0, 3).map(o => ({ title: o.title, level: o.level, district: o.district, office_type: o.office_type })));
 
           setLocalRacesMessage(message);
           setAvailableOffices([...localOffices, ...statewideOffices, ...offices]);
