@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   CheckCircle, AlertCircle, Info, ChevronRight, MapPin, 
   Building, Flag, User, ArrowRight, MessageCircle, Send, 
@@ -27,6 +27,19 @@ const STATE_NAMES = {
   'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
   'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
 };
+
+// View <-> URL mapping for browser history
+const VIEW_URLS = {
+  landing:   '/',
+  wizard:    '/start',
+  browse:    '/browse',
+  results:   '/results',
+  planToRun: '/plan',
+  chatbot:   '/chat',
+};
+const URL_TO_VIEW = Object.fromEntries(
+  Object.entries(VIEW_URLS).map(([view, url]) => [url, view])
+);
 
 // Match SoS candidate records to office objects and attach as office.sos_candidates
 const attachSosCandidates = (offices, sosRecords) => {
@@ -430,9 +443,36 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
 
 function App() {
   const [localRacesMessage, setLocalRacesMessage] = useState(null);
-  const [currentView, setCurrentView] = useState('landing');
+  const [currentView, setCurrentView] = useState(() => {
+    return URL_TO_VIEW[window.location.pathname] || 'landing';
+  });
 
-  const { 
+  const isInitialMount = useRef(true);
+
+  // Sync browser URL with currentView
+  useEffect(() => {
+    const url = VIEW_URLS[currentView] || '/';
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      window.history.replaceState({ view: currentView }, '', url);
+      return;
+    }
+    if (window.location.pathname !== url) {
+      window.history.pushState({ view: currentView }, '', url);
+    }
+  }, [currentView]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const onPopState = (e) => {
+      const view = e.state?.view || URL_TO_VIEW[window.location.pathname] || 'landing';
+      setCurrentView(view);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const {
     user, 
     signOut, 
     saveOffice, 
