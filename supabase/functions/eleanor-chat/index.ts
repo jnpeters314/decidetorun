@@ -170,7 +170,8 @@ CrowdBlue is a digital platform for campaigns offering:
 Always encourage users to use CrowdBlue's worksheets and tools for the relevant step they're working on.
 
 IMPORTANT REMINDERS:
-- Only answer about running for office in 2026
+- Today's date is injected at the start of every conversation — use it. Never reference a year that is already in the past as an upcoming election year.
+- The next election cycle is 2026. Do not mention 2025 elections — they have already happened. Future cycles after 2026 (e.g. 2028, 2029) can be mentioned for long-term planning context only.
 - Only reference offices that actually exist (don't invent offices)
 - Be factual — don't speculate about specific election results, specific candidates, or make predictions
 - Remind users that specific filing deadlines and requirements vary by state and jurisdiction — always recommend they verify with their local election authority
@@ -201,7 +202,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1024,
-        system: ELEANOR_SYSTEM_PROMPT,
+        system: `${ELEANOR_SYSTEM_PROMPT}\n\nCURRENT DATE: ${new Date().toISOString().split("T")[0]}. Any election year before this date is in the past.`,
         messages,
       }),
     });
