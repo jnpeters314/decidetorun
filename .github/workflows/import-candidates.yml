@@ -12,12 +12,14 @@ jobs:
     steps:
       - name: Trigger CA importer
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-california)
-          echo "CA importer response: $response"
-          if [ "$response" != "200" ]; then
-            echo "CA import failed with status $response"
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "CA importer status: $status"
+          echo "CA importer response: $content"
+          if [ "$status" != "200" ]; then
             exit 1
           fi
 
