@@ -28,6 +28,25 @@ const STATE_NAMES = {
   'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
 };
 
+// Match SoS candidate records to office objects and attach as office.sos_candidates
+const attachSosCandidates = (offices, sosRecords) => {
+  if (!sosRecords || sosRecords.length === 0) return offices;
+  return offices.map(office => {
+    const matches = sosRecords.filter(r => {
+      if (r.state !== office.state) return false;
+      if (r.level !== office.level) return false;
+      if (office.level === 'statewide') {
+        const rTitle = r.office_title.toLowerCase();
+        const oType = (office.office_type || '').toLowerCase().replace(/_/g, ' ');
+        const oTitle = (office.title || '').toLowerCase();
+        return rTitle.includes(oType) || oTitle.includes(rTitle.split(' ')[0]);
+      }
+      return String(r.district) === String(office.district);
+    });
+    return { ...office, sos_candidates: matches };
+  });
+};
+
 const simulatedBackend = {
   getOffices: async (zipCode, state) => {
     const { data, error } = await supabase
@@ -62,12 +81,28 @@ const simulatedBackend = {
       .select('*')
       .eq('state', state)
       .order('district', { ascending: true });
-    
+
     if (error) {
       console.error('Error fetching offices:', error);
       return [];
     }
-    
+
+    return data;
+  },
+
+  getSosCandidates: async (state, year = 2026) => {
+    const { data, error } = await supabase
+      .from('sos_candidates')
+      .select('*')
+      .eq('state', state)
+      .eq('election_year', year)
+      .neq('status', 'withdrew')
+      .neq('status', 'disqualified')
+      .order('candidate_name', { ascending: true });
+    if (error) {
+      console.error('Error fetching SoS candidates:', error);
+      return [];
+    }
     return data;
   },
   
@@ -704,8 +739,9 @@ useEffect(() => {
             legislators
           );
 
+          const sosRecords = await simulatedBackend.getSosCandidates(userProfile.state);
           setLocalRacesMessage(message);
-          setAvailableOffices(allOffices);
+          setAvailableOffices(attachSosCandidates(allOffices, sosRecords));
           setBrowseMode(false);
           setCurrentView('results');
         } finally {
@@ -720,11 +756,12 @@ useEffect(() => {
     setLoading(true);
     setBrowseState(state);
     try {
-      const [offices, statewideOffices] = await Promise.all([
+      const [offices, statewideOffices, sosRecords] = await Promise.all([
         simulatedBackend.getOfficesByState(state),
         fetchStatewideRaces(state),
+        simulatedBackend.getSosCandidates(state),
       ]);
-      setAvailableOffices([...statewideOffices, ...offices]);
+      setAvailableOffices(attachSosCandidates([...statewideOffices, ...offices], sosRecords));
       setBrowseMode(true);
       setCurrentView('results');
     } finally {
@@ -1641,6 +1678,56 @@ useEffect(() => {
                         </div>
                       </div>
                     )}
+
+{/* SoS Filed Candidates */}
+{office.sos_candidates && (
+  <div className="border-t pt-4 mb-4">
+    <div className="flex items-center justify-between mb-3">
+      <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+        <Users className="w-4 h-4" />
+        Candidates Who Have Filed
+        {office.sos_candidates.length > 0 && (
+          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+            {office.sos_candidates.length}
+          </span>
+        )}
+      </h4>
+      {office.sos_candidates.length > 0 && (
+        <span className="text-xs text-gray-400 capitalize">
+          {(office.sos_candidates[0].source || '').replace(/_/g, ' ')}
+        </span>
+      )}
+    </div>
+
+    {office.sos_candidates.length === 0 ? (
+      <p className="text-sm text-gray-500 italic">No filings yet — you could be the first.</p>
+    ) : (
+      <div className="space-y-2">
+        {office.sos_candidates.map((cand, idx) => (
+          <div key={idx} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-900 text-sm">{cand.candidate_name}</span>
+              {cand.party && (
+                <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                  cand.party === 'Democratic' ? 'bg-blue-100 text-blue-700' :
+                  cand.party === 'Republican' ? 'bg-red-100 text-red-700' :
+                  'bg-gray-100 text-gray-600'
+                }`}>
+                  {cand.party}
+                </span>
+              )}
+            </div>
+            {cand.filing_date && (
+              <span className="text-xs text-gray-400">
+                Filed {new Date(cand.filing_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
 <button
   onClick={() => {
