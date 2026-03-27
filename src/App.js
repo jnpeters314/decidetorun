@@ -1042,10 +1042,27 @@ useEffect(() => {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendChatMessage()}
+                    onPaste={(e) => {
+                      // Only allow plain text — block files, images, and rich content
+                      const items = e.clipboardData?.items || [];
+                      for (const item of items) {
+                        if (item.kind === 'file' || item.type.startsWith('image/')) {
+                          e.preventDefault();
+                          return;
+                        }
+                      }
+                      const text = e.clipboardData?.getData('text/plain');
+                      if (!text) { e.preventDefault(); return; }
+                      // Strip anything that looks like code blocks or script tags
+                      const clean = text.replace(/<[^>]+>/g, '').replace(/```[\s\S]*?```/g, '').trim();
+                      e.preventDefault();
+                      setChatInput(prev => (prev + clean).slice(0, 500));
+                    }}
                     placeholder="Ask Eleanor a question..."
                     className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none text-sm bg-gray-50"
                     style={{ '--tw-ring-color': '#0a2351' }}
                     disabled={chatLoading}
+                    maxLength={500}
                   />
                   <button
                     onClick={handleSendChatMessage}
