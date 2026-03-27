@@ -75,7 +75,6 @@ export const cityToPageTitle = (city, state) => {
         ? parseInt(houseData.features[0].attributes.BASENAME, 10)
         : null;
 
-      console.log('[DEBUG] TIGERweb districts:', { congressionalDistrict, stateSenateDistrict, stateHouseDistrict });
       return { congressionalDistrict, stateSenateDistrict, stateHouseDistrict };
     } catch (error) {
       console.error('TIGERweb district lookup error:', error);

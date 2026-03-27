@@ -12,6 +12,7 @@ import { LoginModal } from './components/LoginModal';
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
   import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng, fetchDistrictRaces } from './utils/ballotpedia';
+  import { getLegislatorsForLocation, enrichOfficesWithIncumbents } from './utils/openstates';
 
 // State names mapping
 const STATE_NAMES = {
@@ -593,7 +594,6 @@ useEffect(() => {
 
     // Eligibility filters (wizard mode only, not browse mode)
     if (!browseMode) {
-      console.log('[DEBUG] filter: congressionalDistrict =', userProfile.congressionalDistrict, '| stateSenate =', userProfile.stateSenateDistrict, '| stateHouse =', userProfile.stateHouseDistrict);
       // Age filter
       if (userProfile.age) {
         filtered = filtered.filter(office => !office.min_age || office.min_age <= userProfile.age);
@@ -674,12 +674,16 @@ useEffect(() => {
 
           // Look up the user's specific congressional and state legislative districts
           let districtOffices = [];
+          let legislators = [];
           if (zipData?.lat && zipData?.lng) {
-            const districts = await getDistrictsFromLatLng(zipData.lat, zipData.lng);
+            const [districts, openStatesLegislators] = await Promise.all([
+              getDistrictsFromLatLng(zipData.lat, zipData.lng),
+              getLegislatorsForLocation(zipData.lat, zipData.lng),
+            ]);
+            legislators = openStatesLegislators;
             setUserProfile(prev => ({ ...prev, ...districts }));
 
             if (districts.congressionalDistrict || districts.stateSenateDistrict || districts.stateHouseDistrict) {
-              // Fetch race data for only the user's specific districts from Ballotpedia
               districtOffices = await fetchDistrictRaces(
                 userProfile.state,
                 districts.congressionalDistrict,
@@ -694,8 +698,14 @@ useEffect(() => {
             districtOffices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
           }
 
+          // Enrich state legislature offices with real incumbent names from OpenStates
+          const allOffices = enrichOfficesWithIncumbents(
+            [...localOffices, ...statewideOffices, ...districtOffices],
+            legislators
+          );
+
           setLocalRacesMessage(message);
-          setAvailableOffices([...localOffices, ...statewideOffices, ...districtOffices]);
+          setAvailableOffices(allOffices);
           setBrowseMode(false);
           setCurrentView('results');
         } finally {
