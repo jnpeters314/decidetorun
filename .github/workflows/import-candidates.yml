@@ -6,6 +6,23 @@ on:
   workflow_dispatch:        # Allow manual trigger from GitHub Actions UI
 
 jobs:
+  import-fec:
+    name: FEC (Federal — all 50 states)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger FEC importer
+        run: |
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "FEC importer status: $status"
+          echo "FEC importer response: $content"
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
+
   import-california:
     name: California CAL-ACCESS
     runs-on: ubuntu-latest
@@ -19,6 +36,40 @@ jobs:
           content=$(echo "$body" | sed '/HTTP_STATUS:/d')
           echo "CA importer status: $status"
           echo "CA importer response: $content"
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
+
+  import-washington:
+    name: Washington State PDC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger WA importer
+        run: |
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-washington)
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "WA importer status: $status"
+          echo "WA importer response: $content"
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
+
+  import-north-carolina:
+    name: North Carolina NCSBE
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger NC importer
+        run: |
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-north-carolina)
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "NC importer status: $status"
+          echo "NC importer response: $content"
           if [ "$status" != "200" ]; then
             exit 1
           fi

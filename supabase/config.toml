@@ -3,3 +3,12 @@ verify_jwt = false
 
 [functions.import-florida]
 verify_jwt = false
+
+[functions.import-fec]
+verify_jwt = false
+
+[functions.import-washington]
+verify_jwt = false
+
+[functions.import-north-carolina]
+verify_jwt = false

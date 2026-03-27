@@ -41,6 +41,31 @@ const URL_TO_VIEW = Object.fromEntries(
   Object.entries(VIEW_URLS).map(([view, url]) => [url, view])
 );
 
+// Normalize district to a plain integer string for comparison ("01" === "1" === 1)
+const normalizeDistrict = (d) => {
+  if (d == null || d === '') return null;
+  const n = parseInt(String(d), 10);
+  return isNaN(n) ? String(d).toLowerCase() : String(n);
+};
+
+const SOURCE_LABELS = {
+  fec: 'Federal Election Commission',
+  north_carolina_sbe: 'NC State Board of Elections',
+  california_sos: 'CA Secretary of State',
+  florida_sos: 'FL Division of Elections',
+  washington_sos: 'WA Public Disclosure Commission',
+};
+
+const partyPill = (party) => {
+  if (party === 'Democratic') return 'bg-blue-100 text-blue-700';
+  if (party === 'Republican') return 'bg-red-100 text-red-700';
+  if (party === 'Independent') return 'bg-purple-100 text-purple-700';
+  if (party === 'Libertarian') return 'bg-yellow-100 text-yellow-700';
+  if (party === 'Green') return 'bg-green-100 text-green-700';
+  if (party === 'Unaffiliated' || party === 'No Party Affiliation') return 'bg-gray-100 text-gray-500';
+  return 'bg-gray-100 text-gray-600';
+};
+
 // Match SoS candidate records to office objects and attach as office.sos_candidates
 const attachSosCandidates = (offices, sosRecords) => {
   if (!sosRecords || sosRecords.length === 0) return offices;
@@ -54,7 +79,8 @@ const attachSosCandidates = (offices, sosRecords) => {
         const oTitle = (office.title || '').toLowerCase();
         return rTitle.includes(oType) || oTitle.includes(rTitle.split(' ')[0]);
       }
-      return String(r.district) === String(office.district);
+      // Normalize districts so "01" matches "1" matches 1
+      return normalizeDistrict(r.district) === normalizeDistrict(office.district);
     });
     return { ...office, sos_candidates: matches };
   });
@@ -485,6 +511,7 @@ function App() {
   const [wizardStep, setWizardStep] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [savedOfficeIds, setSavedOfficeIds] = useState(new Set());
+  const [expandedCandidates, setExpandedCandidates] = useState(new Set());
   const [compareOffices, setCompareOffices] = useState([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [selectedOffice, setSelectedOffice] = useState(null);
@@ -1737,54 +1764,89 @@ useEffect(() => {
                     )}
 
 {/* SoS Filed Candidates */}
-{office.sos_candidates && (
-  <div className="border-t pt-4 mb-4">
-    <div className="flex items-center justify-between mb-3">
-      <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-        <Users className="w-4 h-4" />
-        Candidates Who Have Filed
-        {office.sos_candidates.length > 0 && (
-          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
-            {office.sos_candidates.length}
-          </span>
-        )}
-      </h4>
-      {office.sos_candidates.length > 0 && (
-        <span className="text-xs text-gray-400 capitalize">
-          {(office.sos_candidates[0].source || '').replace(/_/g, ' ')}
-        </span>
+{office.sos_candidates && (() => {
+  const cands = office.sos_candidates;
+  const SHOW = 5;
+  const officeKey = `${office.state}-${office.level}-${office.district ?? ''}-${office.title ?? ''}`;
+  const showAll = expandedCandidates.has(officeKey);
+  const source = cands.length > 0 ? (SOURCE_LABELS[cands[0].source] || cands[0].source) : null;
+
+  const partyCounts = cands.reduce((acc, c) => {
+    const p = c.party || 'Other';
+    acc[p] = (acc[p] || 0) + 1;
+    return acc;
+  }, {});
+  const partyOrder = ['Democratic', 'Republican', 'Independent', 'Libertarian', 'Green', 'Unaffiliated', 'No Party Affiliation'];
+  const breakdown = partyOrder.filter(p => partyCounts[p]).map(p => ({ party: p, count: partyCounts[p] }));
+  Object.keys(partyCounts).filter(p => !partyOrder.includes(p)).forEach(p => breakdown.push({ party: p, count: partyCounts[p] }));
+
+  const visible = showAll ? cands : cands.slice(0, SHOW);
+
+  return (
+    <div className="border-t pt-4 mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+          <Users className="w-4 h-4" />
+          Candidates Who Have Filed
+          {cands.length > 0 && (
+            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+              {cands.length}
+            </span>
+          )}
+        </h4>
+        {source && <span className="text-xs text-gray-400">{source}</span>}
+      </div>
+
+      {breakdown.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {breakdown.map(({ party, count }) => (
+            <span key={party} className={`px-2 py-0.5 text-xs rounded-full font-medium ${partyPill(party)}`}>
+              {count} {party}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {cands.length === 0 ? (
+        <p className="text-sm text-gray-500 italic">No filings yet — you could be the first.</p>
+      ) : (
+        <>
+          <div className="space-y-1.5">
+            {visible.map((cand, idx) => (
+              <div key={idx} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-medium text-gray-900 text-sm truncate">{cand.candidate_name}</span>
+                  {cand.party && (
+                    <span className={`px-2 py-0.5 text-xs rounded-full font-medium shrink-0 ${partyPill(cand.party)}`}>
+                      {cand.party === 'No Party Affiliation' ? 'NPA' : cand.party}
+                    </span>
+                  )}
+                </div>
+                {cand.filing_date && (
+                  <span className="text-xs text-gray-400 shrink-0 ml-2">
+                    Filed {new Date(cand.filing_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          {cands.length > SHOW && (
+            <button
+              onClick={() => setExpandedCandidates(prev => {
+                const next = new Set(prev);
+                if (next.has(officeKey)) next.delete(officeKey); else next.add(officeKey);
+                return next;
+              })}
+              className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              {showAll ? 'Show fewer' : `+ ${cands.length - SHOW} more candidates`}
+            </button>
+          )}
+        </>
       )}
     </div>
-
-    {office.sos_candidates.length === 0 ? (
-      <p className="text-sm text-gray-500 italic">No filings yet — you could be the first.</p>
-    ) : (
-      <div className="space-y-2">
-        {office.sos_candidates.map((cand, idx) => (
-          <div key={idx} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-900 text-sm">{cand.candidate_name}</span>
-              {cand.party && (
-                <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                  cand.party === 'Democratic' ? 'bg-blue-100 text-blue-700' :
-                  cand.party === 'Republican' ? 'bg-red-100 text-red-700' :
-                  'bg-gray-100 text-gray-600'
-                }`}>
-                  {cand.party}
-                </span>
-              )}
-            </div>
-            {cand.filing_date && (
-              <span className="text-xs text-gray-400">
-                Filed {new Date(cand.filing_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-)}
+  );
+})()}
 
 <button
   onClick={() => {
