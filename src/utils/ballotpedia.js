@@ -44,28 +44,41 @@ export const cityToPageTitle = (city, state) => {
     return `${city.trim().replace(/ /g, '_')},_${stateName.replace(/ /g, '_')}`;
   };
   
-  // Look up congressional and state legislative districts via Supabase edge function
-  // (proxies Census Geocoder server-side to avoid CORS restrictions)
+  // Look up congressional and state legislative districts using Census TIGERweb REST API
+  // (ArcGIS REST service — supports browser CORS, no API key required)
   export const getDistrictsFromLatLng = async (lat, lng) => {
+    const base = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Legislative/MapServer';
+    const params = `geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=BASENAME&returnGeometry=false&f=json`;
+
     try {
-      const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-      const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
-      const res = await fetch(`${supabaseUrl}/functions/v1/get-districts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-        },
-        body: JSON.stringify({ lat, lng }),
-      });
-      const data = await res.json();
-      return {
-        congressionalDistrict: typeof data.congressionalDistrict === 'number' ? data.congressionalDistrict : null,
-        stateSenateDistrict: typeof data.stateSenateDistrict === 'number' ? data.stateSenateDistrict : null,
-        stateHouseDistrict: typeof data.stateHouseDistrict === 'number' ? data.stateHouseDistrict : null,
-      };
+      const [cdRes, senateRes, houseRes] = await Promise.all([
+        fetch(`${base}/0/query?${params}`),  // Congressional districts
+        fetch(`${base}/1/query?${params}`),  // State Senate (upper)
+        fetch(`${base}/2/query?${params}`),  // State House/Assembly (lower)
+      ]);
+
+      const [cdData, senateData, houseData] = await Promise.all([
+        cdRes.json(),
+        senateRes.json(),
+        houseRes.json(),
+      ]);
+
+      const congressionalDistrict = cdData.features?.[0]?.attributes?.BASENAME != null
+        ? parseInt(cdData.features[0].attributes.BASENAME, 10)
+        : null;
+
+      const stateSenateDistrict = senateData.features?.[0]?.attributes?.BASENAME != null
+        ? parseInt(senateData.features[0].attributes.BASENAME, 10)
+        : null;
+
+      const stateHouseDistrict = houseData.features?.[0]?.attributes?.BASENAME != null
+        ? parseInt(houseData.features[0].attributes.BASENAME, 10)
+        : null;
+
+      console.log('[DEBUG] TIGERweb districts:', { congressionalDistrict, stateSenateDistrict, stateHouseDistrict });
+      return { congressionalDistrict, stateSenateDistrict, stateHouseDistrict };
     } catch (error) {
-      console.error('District lookup error:', error);
+      console.error('TIGERweb district lookup error:', error);
       return { congressionalDistrict: null, stateSenateDistrict: null, stateHouseDistrict: null };
     }
   };
@@ -322,4 +335,160 @@ export const fetchStatewideRaces = async (state) => {
     console.error(`Ballotpedia statewide fetch error for ${state}:`, error);
     return [];
   }
+};
+
+// Ordinal suffix helper (1 → "1st", 2 → "2nd", etc.)
+const ordinal = (n) => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+
+// Build Ballotpedia page title for a congressional district
+// e.g. state=CA, district=11 → "California's_11th_congressional_district"
+const congressionalPageTitle = (state, district) => {
+  const stateName = (STATE_FULL_NAMES[state] || state).replace(/ /g, '_');
+  return `${stateName}%27s_${ordinal(district)}_congressional_district`;
+};
+
+// Build Ballotpedia page title for a state legislative district
+// e.g. state=CA, district=7, chamber='senate' → "California_State_Senate,_District_7"
+const stateLegPageTitle = (state, district, chamber) => {
+  const stateName = (STATE_FULL_NAMES[state] || state).replace(/ /g, '_');
+  const chamberLabel = chamber === 'senate' ? 'State_Senate' : 'State_Assembly';
+  return `${stateName}_${chamberLabel},_District_${district}`;
+};
+
+// Parse a congressional district Ballotpedia page into an office object
+const parseCongressionalPage = (wikitext, state, district) => {
+  const currentYear = new Date().getFullYear();
+  const yearSections = wikitext.split(/===(\d{4})===/);
+  const offices = [];
+
+  for (let i = 1; i < yearSections.length; i += 2) {
+    const year = parseInt(yearSections[i]);
+    const content = yearSections[i + 1];
+    if (year < currentYear) continue;
+
+    const electionDateMatch = content.match(/start=(\d{2}\/\d{2}\/\d{4})/);
+    const electionDate = electionDateMatch
+      ? new Date(electionDateMatch[1]).toISOString().split('T')[0]
+      : `${year}-11-03`;
+
+    const filingMatch = content.match(/filing deadline.*?start=(\d{2}\/\d{2}\/\d{4})/i);
+    const filingDeadline = filingMatch
+      ? new Date(filingMatch[1]).toISOString().split('T')[0]
+      : `${year}-03-01`;
+
+    offices.push({
+      id: `federal-house-${state}-${district}`.toLowerCase(),
+      title: `U.S. House — ${STATE_FULL_NAMES[state] || state} District ${district}`,
+      level: 'federal',
+      state,
+      district: String(district),
+      office_type: 'house',
+      next_election: electionDate,
+      filing_deadline: filingDeadline,
+      incumbent: 'See Ballotpedia',
+      estimated_cost: '$1,000,000-$5,000,000',
+      total_candidates: 0,
+      candidates_running: [],
+      min_age: 25,
+      confidence: 'medium',
+      data_source: 'Ballotpedia',
+    });
+  }
+
+  return offices;
+};
+
+// Parse a state legislative district Ballotpedia page into an office object
+const parseStateLegPage = (wikitext, state, district, chamber) => {
+  const currentYear = new Date().getFullYear();
+  const yearSections = wikitext.split(/===(\d{4})===/);
+  const offices = [];
+
+  for (let i = 1; i < yearSections.length; i += 2) {
+    const year = parseInt(yearSections[i]);
+    const content = yearSections[i + 1];
+    if (year < currentYear) continue;
+
+    const electionDateMatch = content.match(/start=(\d{2}\/\d{2}\/\d{4})/);
+    const electionDate = electionDateMatch
+      ? new Date(electionDateMatch[1]).toISOString().split('T')[0]
+      : `${year}-11-03`;
+
+    const filingMatch = content.match(/filing deadline.*?start=(\d{2}\/\d{2}\/\d{4})/i);
+    const filingDeadline = filingMatch
+      ? new Date(filingMatch[1]).toISOString().split('T')[0]
+      : `${year}-03-01`;
+
+    const isSenate = chamber === 'senate';
+    offices.push({
+      id: `state-${chamber}-${state}-${district}`.toLowerCase(),
+      title: `${STATE_FULL_NAMES[state] || state} State ${isSenate ? 'Senate' : 'Assembly'} — District ${district}`,
+      level: 'state',
+      state,
+      district: String(district),
+      office_type: isSenate ? 'state_senate' : 'state_assembly',
+      next_election: electionDate,
+      filing_deadline: filingDeadline,
+      incumbent: 'See Ballotpedia',
+      estimated_cost: isSenate ? '$100,000-$500,000' : '$50,000-$300,000',
+      total_candidates: 0,
+      candidates_running: [],
+      min_age: 18,
+      confidence: 'medium',
+      data_source: 'Ballotpedia',
+    });
+  }
+
+  return offices;
+};
+
+// Fetch offices for a specific congressional district from Ballotpedia
+const fetchDistrictPage = async (pageTitle, parser) => {
+  try {
+    const sectionsRes = await fetch(
+      `https://ballotpedia.org/wiki/api.php?action=parse&page=${pageTitle}&prop=sections&format=json&origin=*`
+    );
+    const sectionsData = await sectionsRes.json();
+    if (sectionsData.error || !sectionsData.parse) return [];
+
+    const electionsSection = sectionsData.parse.sections.find(s => s.line === 'Elections');
+    if (!electionsSection) return [];
+
+    const contentRes = await fetch(
+      `https://ballotpedia.org/wiki/api.php?action=parse&page=${pageTitle}&section=${electionsSection.index}&prop=wikitext&format=json&origin=*`
+    );
+    const contentData = await contentRes.json();
+    const wikitext = contentData.parse.wikitext['*'];
+    return parser(wikitext);
+  } catch (error) {
+    console.error(`Ballotpedia district fetch error for ${pageTitle}:`, error);
+    return [];
+  }
+};
+
+// Fetch congressional + state legislative district races for a user's specific districts
+export const fetchDistrictRaces = async (state, congressionalDistrict, stateSenateDistrict, stateHouseDistrict) => {
+  const fetches = [];
+
+  if (congressionalDistrict) {
+    const title = congressionalPageTitle(state, congressionalDistrict);
+    fetches.push(fetchDistrictPage(title, (wt) => parseCongressionalPage(wt, state, congressionalDistrict)));
+  }
+
+  if (stateSenateDistrict) {
+    const title = stateLegPageTitle(state, stateSenateDistrict, 'senate');
+    fetches.push(fetchDistrictPage(title, (wt) => parseStateLegPage(wt, state, stateSenateDistrict, 'senate')));
+  }
+
+  if (stateHouseDistrict) {
+    const title = stateLegPageTitle(state, stateHouseDistrict, 'assembly');
+    fetches.push(fetchDistrictPage(title, (wt) => parseStateLegPage(wt, state, stateHouseDistrict, 'assembly')));
+  }
+
+  const results = await Promise.all(fetches);
+  return results.flat();
 };

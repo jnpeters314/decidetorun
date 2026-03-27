@@ -11,7 +11,7 @@ import { LoginModal } from './components/LoginModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
-  import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng } from './utils/ballotpedia';
+  import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng, fetchDistrictRaces } from './utils/ballotpedia';
 
 // State names mapping
 const STATE_NAMES = {
@@ -666,27 +666,36 @@ useEffect(() => {
       if (wizardStep === 2) {
         setLoading(true);
         try {
-          const [zipData, offices, { offices: localOffices, message }, statewideOffices] = await Promise.all([
+          const [zipData, { offices: localOffices, message }, statewideOffices] = await Promise.all([
             getCityFromZip(userProfile.zipCode),
-            simulatedBackend.getOffices(userProfile.zipCode, userProfile.state),
             fetchLocalRaces(userProfile.city, userProfile.state, userProfile.zipCode),
             fetchStatewideRaces(userProfile.state),
           ]);
 
-          // Look up congressional and state legislative districts from zip coordinates
+          // Look up the user's specific congressional and state legislative districts
+          let districtOffices = [];
           if (zipData?.lat && zipData?.lng) {
             const districts = await getDistrictsFromLatLng(zipData.lat, zipData.lng);
-            console.log('[DEBUG] zip coords:', zipData.lat, zipData.lng);
-            console.log('[DEBUG] districts returned:', districts);
             setUserProfile(prev => ({ ...prev, ...districts }));
-          } else {
-            console.log('[DEBUG] no lat/lng from zip lookup, zipData:', zipData);
+
+            if (districts.congressionalDistrict || districts.stateSenateDistrict || districts.stateHouseDistrict) {
+              // Fetch race data for only the user's specific districts from Ballotpedia
+              districtOffices = await fetchDistrictRaces(
+                userProfile.state,
+                districts.congressionalDistrict,
+                districts.stateSenateDistrict,
+                districts.stateHouseDistrict
+              );
+            }
           }
 
-          console.log('[DEBUG] offices sample (first 3):', [...localOffices, ...statewideOffices, ...offices].slice(0, 3).map(o => ({ title: o.title, level: o.level, district: o.district, office_type: o.office_type })));
+          // Fall back to full state query if district lookup failed
+          if (districtOffices.length === 0) {
+            districtOffices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
+          }
 
           setLocalRacesMessage(message);
-          setAvailableOffices([...localOffices, ...statewideOffices, ...offices]);
+          setAvailableOffices([...localOffices, ...statewideOffices, ...districtOffices]);
           setBrowseMode(false);
           setCurrentView('results');
         } finally {
