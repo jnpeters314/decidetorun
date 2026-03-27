@@ -1,0 +1,5 @@
+[functions.import-california]
+verify_jwt = false
+
+[functions.import-florida]
+verify_jwt = false
