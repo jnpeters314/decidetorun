@@ -1,0 +1,41 @@
+name: Import SoS Candidate Data
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Every Monday at 8am UTC (midnight Pacific)
+  workflow_dispatch:        # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  import-california:
+    name: California CAL-ACCESS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger CA importer
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-california)
+          echo "CA importer response: $response"
+          if [ "$response" != "200" ]; then
+            echo "CA import failed with status $response"
+            exit 1
+          fi
+
+  import-florida:
+    name: Florida Division of Elections
+    runs-on: ubuntu-latest
+    # Florida qualifying opens in June — skip until then
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && contains(fromJson('["06","07","08","09","10","11"]'), format('{0}', github.event.schedule)) ) }}
+    steps:
+      - name: Trigger FL importer
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-florida)
+          echo "FL importer response: $response"
+          if [ "$response" != "200" ]; then
+            echo "FL import failed with status $response"
+            exit 1
+          fi
