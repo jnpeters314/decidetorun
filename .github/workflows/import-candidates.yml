@@ -14,6 +14,7 @@ jobs:
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json" \
             https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-california)
           echo "CA importer response: $response"
@@ -32,6 +33,7 @@ jobs:
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json" \
             https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-florida)
           echo "FL importer response: $response"
