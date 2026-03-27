@@ -42,7 +42,16 @@ serve(async (req) => {
 
   try {
     const res = await fetch(FL_DATA_URL);
-    if (!res.ok) throw new Error(`FL fetch failed: ${res.status}`);
+    if (!res.ok) {
+      return new Response(
+        JSON.stringify({
+          error: `FL fetch failed: ${res.status}`,
+          url_tried: FL_DATA_URL,
+          hint: "Update FL_DATA_URL in the function — check https://dos.fl.gov/elections/data-statistics/elections-data/candidate-information/ for the current download link",
+        }),
+        { status: 200, headers: CORS_HEADERS }
+      );
+    }
     const text = await res.text();
 
     const candidates = parseFloridaTsv(text);

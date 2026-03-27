@@ -31,11 +31,13 @@ jobs:
     steps:
       - name: Trigger FL importer
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-florida)
-          echo "FL importer response: $response"
-          if [ "$response" != "200" ]; then
-            echo "FL import failed with status $response"
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "FL importer status: $status"
+          echo "FL importer response: $content"
+          if [ "$status" != "200" ]; then
             exit 1
           fi
