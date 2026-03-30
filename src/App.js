@@ -2531,37 +2531,48 @@ if (currentView === 'privacy') {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">5. Data Sharing</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">5. Cookies and Analytics</h2>
+            <p>We use cookies and similar tracking technologies to operate the Service and understand how it is used.</p>
+            <ul className="list-disc pl-6 space-y-1 mt-2">
+              <li><strong>Essential cookies:</strong> Set by Supabase to manage your login session. These are required for the Service to function and cannot be disabled.</li>
+              <li><strong>Analytics cookies:</strong> We use Google Analytics to collect anonymous information about how visitors use the site — including pages visited, time on site, and general location (city/region level). This data is aggregated and does not identify you personally. Google Analytics sets cookies such as <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">_ga</code> and <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">_gid</code> that persist for up to 2 years.</li>
+            </ul>
+            <p className="mt-2"><strong>Opt out of Google Analytics:</strong> You can prevent Google Analytics from collecting your data by installing the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google Analytics Opt-out Browser Add-on</a>, or by enabling "Do Not Track" in your browser settings. You can also manage cookies through your browser's privacy settings.</p>
+            <p className="mt-2">We do not use advertising cookies, retargeting pixels, or any cookies that track you across other websites.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">7. Data Sharing</h2>
             <p>We do not sell your personal information. We do not share your information with third parties except: (a) as described above for service providers necessary to operate the Service; (b) when required by law; or (c) with your explicit consent.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">6. Data Retention</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">8. Data Retention</h2>
             <p>We retain your account information for as long as your account is active. You may delete your account at any time by contacting us at <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a>, after which we will delete your personal information within 30 days.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">7. Security</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">9. Security</h2>
             <p>We use industry-standard security measures including encrypted connections (HTTPS) and secure authentication via Supabase. No method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">8. Your Rights</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">10. Your Rights</h2>
             <p>You have the right to access, correct, or delete your personal information. To exercise these rights, contact us at <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a>. If you are in the European Economic Area or California, you may have additional rights under GDPR or CCPA respectively.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">9. Children's Privacy</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">11. Children's Privacy</h2>
             <p>The Service is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe we have inadvertently collected such information, please contact us immediately.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">10. Changes to This Policy</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">12. Changes to This Policy</h2>
             <p>We may update this Privacy Policy periodically. We will notify you of material changes by posting the updated policy on this page with a revised date.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">11. Contact</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">13. Contact</h2>
             <p>Questions about this Privacy Policy? Contact us at <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a>.</p>
           </section>
         </div>
