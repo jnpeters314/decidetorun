@@ -30,14 +30,15 @@ const STATE_NAMES = {
 
 // View <-> URL mapping for browser history
 const VIEW_URLS = {
-  landing:   '/',
-  wizard:    '/start',
-  browse:    '/browse',
-  results:   '/results',
-  planToRun: '/plan',
-  chatbot:   '/chat',
-  terms:     '/terms',
-  privacy:   '/privacy',
+  landing:       '/',
+  wizard:        '/start',
+  browse:        '/browse',
+  results:       '/results',
+  planToRun:     '/plan',
+  chatbot:       '/chat',
+  terms:         '/terms',
+  privacy:       '/privacy',
+  accessibility: '/accessibility',
 };
 const URL_TO_VIEW = Object.fromEntries(
   Object.entries(VIEW_URLS).map(([view, url]) => [url, view])
@@ -377,19 +378,16 @@ const CompareModal = ({ offices, onClose }) => {
 const SiteFooter = ({ onNavigate }) => (
   <footer style={{ backgroundColor: '#0a2351' }} className="mt-auto">
     <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <span className="text-blue-200 text-sm">© {new Date().getFullYear()} CrowdBlue. All rights reserved.</span>
+      <span className="text-blue-200 text-sm">© {new Date().getFullYear()} Decide to Run. All rights reserved.</span>
       <div className="flex items-center gap-6">
-        <button
-          onClick={() => onNavigate('terms')}
-          className="text-blue-200 hover:text-white text-sm transition-colors"
-        >
+        <button onClick={() => onNavigate('terms')} className="text-blue-200 hover:text-white text-sm transition-colors">
           Terms of Service
         </button>
-        <button
-          onClick={() => onNavigate('privacy')}
-          className="text-blue-200 hover:text-white text-sm transition-colors"
-        >
+        <button onClick={() => onNavigate('privacy')} className="text-blue-200 hover:text-white text-sm transition-colors">
           Privacy Policy
+        </button>
+        <button onClick={() => onNavigate('accessibility')} className="text-blue-200 hover:text-white text-sm transition-colors">
+          Accessibility
         </button>
       </div>
     </div>
@@ -2565,6 +2563,90 @@ if (currentView === 'privacy') {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">11. Contact</h2>
             <p>Questions about this Privacy Policy? Contact us at <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a>.</p>
+          </section>
+        </div>
+      </div>
+      <SiteFooter onNavigate={setCurrentView} />
+    </div>
+  );
+}
+
+// Accessibility Statement
+if (currentView === 'accessibility') {
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div style={{ backgroundColor: '#0a2351' }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
+          <button onClick={() => setCurrentView('landing')} className="text-blue-200 hover:text-white text-sm transition-colors">← Back</button>
+          <span className="font-bold text-white text-lg">Decide to Run</span>
+        </div>
+      </div>
+      <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Accessibility Statement</h1>
+        <p className="text-sm text-gray-500 mb-8">Last updated: March 2026</p>
+
+        <div className="prose prose-gray max-w-none space-y-6 text-gray-700">
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Our Commitment</h2>
+            <p>CrowdBlue is committed to making Decide to Run accessible to everyone, including people with disabilities. We believe civic participation tools should be usable by all people, regardless of ability. We are working toward conformance with the <strong>Web Content Accessibility Guidelines (WCAG) 2.1 Level AA</strong>.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">What We Do</h2>
+            <ul className="list-disc pl-6 space-y-1">
+              <li><strong>Keyboard navigation:</strong> All interactive elements — buttons, forms, and navigation — are reachable and operable using a keyboard alone.</li>
+              <li><strong>Color contrast:</strong> Text and interactive elements meet or exceed WCAG AA contrast ratio requirements.</li>
+              <li><strong>Responsive design:</strong> The site is fully usable on mobile devices and adjusts to different screen sizes and zoom levels.</li>
+              <li><strong>Semantic HTML:</strong> We use proper heading structure, landmark regions, and semantic elements to support screen readers.</li>
+              <li><strong>Focus indicators:</strong> Visible focus states are maintained for all interactive elements.</li>
+              <li><strong>Text alternatives:</strong> Icons and images used for informational purposes include descriptive labels.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Known Limitations</h2>
+            <p>We are actively improving the site and are aware of the following areas in progress:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Some dynamic content updates (such as live search results) may not announce changes to screen reader users in all cases. We are working to improve ARIA live region support.</li>
+              <li>The AI assistant (Eleanor) is a conversational interface that may present challenges for some assistive technologies. We are evaluating improvements to its accessibility.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Technical Standards</h2>
+            <p>Decide to Run is built with:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>React with semantic HTML5 elements</li>
+              <li>Tailwind CSS with accessible color system</li>
+              <li>Lucide icons with accompanying text labels</li>
+              <li>No auto-playing media</li>
+              <li>No content that flashes more than three times per second</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Browser and Assistive Technology Support</h2>
+            <p>We aim to support the following combinations:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>NVDA + Chrome on Windows</li>
+              <li>VoiceOver + Safari on macOS and iOS</li>
+              <li>TalkBack + Chrome on Android</li>
+              <li>JAWS + Chrome or Edge on Windows</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Report an Accessibility Issue</h2>
+            <p>If you experience a barrier or have difficulty using any part of this site, please contact us. We take accessibility feedback seriously and will respond within 5 business days.</p>
+            <p className="mt-2">
+              Email: <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a><br />
+              Please include: the page or feature you were using, the assistive technology and browser you were using, and a description of the issue.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Formal Complaints</h2>
+            <p>If you are not satisfied with our response, you may contact the <a href="https://www.ada.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">U.S. Department of Justice ADA Information Line</a> at 1-800-514-0301 or file a complaint with the relevant authority in your jurisdiction.</p>
           </section>
         </div>
       </div>
