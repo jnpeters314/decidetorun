@@ -36,6 +36,8 @@ const VIEW_URLS = {
   results:   '/results',
   planToRun: '/plan',
   chatbot:   '/chat',
+  terms:     '/terms',
+  privacy:   '/privacy',
 };
 const URL_TO_VIEW = Object.fromEntries(
   Object.entries(VIEW_URLS).map(([view, url]) => [url, view])
@@ -371,6 +373,28 @@ const CompareModal = ({ offices, onClose }) => {
     </div>
   );
 };
+
+const SiteFooter = ({ onNavigate }) => (
+  <footer style={{ backgroundColor: '#0a2351' }} className="mt-auto">
+    <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span className="text-blue-200 text-sm">© {new Date().getFullYear()} CrowdBlue. All rights reserved.</span>
+      <div className="flex items-center gap-6">
+        <button
+          onClick={() => onNavigate('terms')}
+          className="text-blue-200 hover:text-white text-sm transition-colors"
+        >
+          Terms of Service
+        </button>
+        <button
+          onClick={() => onNavigate('privacy')}
+          className="text-blue-200 hover:text-white text-sm transition-colors"
+        >
+          Privacy Policy
+        </button>
+      </div>
+    </div>
+  </footer>
+);
 
 // Persistent Header Component
 const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onShowLogin }) => {
@@ -1149,6 +1173,7 @@ useEffect(() => {
             Free to use · Covers all 50 states · Real FEC data
           </div>
         </div>
+      <SiteFooter onNavigate={setCurrentView} />
       </div>
     );
   }
@@ -1198,8 +1223,9 @@ useEffect(() => {
             )}
           </div>
         </div>
-        <LoginModal 
-        isOpen={showLoginModal} 
+        <SiteFooter onNavigate={setCurrentView} />
+        <LoginModal
+        isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
       />
       </div>
@@ -1357,8 +1383,9 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        <LoginModal 
-        isOpen={showLoginModal} 
+        <SiteFooter onNavigate={setCurrentView} />
+        <LoginModal
+        isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
       />
       </div>
@@ -1959,8 +1986,9 @@ useEffect(() => {
           )}
         </div>
       </div>
-      <LoginModal 
-        isOpen={showLoginModal} 
+      <SiteFooter onNavigate={setCurrentView} />
+      <LoginModal
+        isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
       />
     </div>
@@ -2261,8 +2289,9 @@ if (currentView === 'planToRun' && currentPlan) {
           </div>
         </div>
       </div>
-      <LoginModal 
-        isOpen={showLoginModal} 
+      <SiteFooter onNavigate={setCurrentView} />
+      <LoginModal
+        isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
       />
     </div>
@@ -2364,6 +2393,182 @@ if (currentView === 'chatbot') {
         isOpen={showLoginModal} loadStates
         onClose={() => setShowLoginModal(false)}
       />
+    </div>
+  );
+}
+
+// Terms of Service
+if (currentView === 'terms') {
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div style={{ backgroundColor: '#0a2351' }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
+          <button onClick={() => setCurrentView('landing')} className="text-blue-200 hover:text-white text-sm transition-colors">← Back</button>
+          <span className="font-bold text-white text-lg">Decide to Run</span>
+        </div>
+      </div>
+      <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Terms of Service</h1>
+        <p className="text-sm text-gray-500 mb-8">Last updated: March 2026</p>
+
+        <div className="prose prose-gray max-w-none space-y-6 text-gray-700">
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">1. Acceptance of Terms</h2>
+            <p>By accessing or using Decide to Run ("the Service"), operated by CrowdBlue, you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">2. Description of Service</h2>
+            <p>Decide to Run is a civic information platform that helps individuals explore running for elected office. The Service provides publicly available election data, candidate filing information, district lookup tools, campaign planning resources, and an AI-powered assistant named Eleanor.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">3. Informational Purpose Only</h2>
+            <p>All content provided through the Service — including candidate data, election deadlines, filing requirements, and AI-generated responses — is for general informational purposes only. It does not constitute legal, financial, or political advice. You should consult qualified professionals before making decisions about running for office.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">4. Data Accuracy</h2>
+            <p>We source election data from government agencies including the Federal Election Commission (FEC), state Secretaries of State, and state election boards. While we strive to keep this information accurate and current, we make no warranties regarding the completeness, accuracy, or timeliness of any data. Always verify information directly with your state or local election authority.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">5. User Accounts</h2>
+            <p>You may create an account to save offices and campaign plans. You are responsible for maintaining the security of your account credentials and for all activity that occurs under your account. You must provide accurate information and keep it up to date.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">6. Acceptable Use</h2>
+            <p>You agree not to use the Service to: (a) violate any applicable law or regulation; (b) transmit harmful, offensive, or misleading content; (c) attempt to gain unauthorized access to any part of the Service; (d) scrape or bulk-download data without permission; or (e) use the Service for any commercial purpose without our written consent.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">7. AI Assistant (Eleanor)</h2>
+            <p>Eleanor is an AI assistant powered by Anthropic's Claude. Responses are generated automatically and may contain errors or outdated information. Eleanor's responses do not constitute professional advice. Do not rely solely on Eleanor for decisions about candidacy, campaign finance, or legal compliance.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">8. Intellectual Property</h2>
+            <p>The Service and its original content (excluding publicly sourced government data) are owned by CrowdBlue and protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">9. Disclaimer of Warranties</h2>
+            <p>The Service is provided "as is" and "as available" without warranties of any kind, express or implied. CrowdBlue does not warrant that the Service will be uninterrupted, error-free, or free of viruses or other harmful components.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">10. Limitation of Liability</h2>
+            <p>To the fullest extent permitted by law, CrowdBlue shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the Service.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">11. Changes to Terms</h2>
+            <p>We may update these Terms at any time. We will notify users of material changes by posting the updated Terms on this page with a revised date. Continued use of the Service after changes constitutes acceptance of the new Terms.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">12. Contact</h2>
+            <p>Questions about these Terms? Contact us at <a href="mailto:hello@decidetorun.com" className="text-blue-600 hover:underline">hello@decidetorun.com</a>.</p>
+          </section>
+        </div>
+      </div>
+      <SiteFooter onNavigate={setCurrentView} />
+    </div>
+  );
+}
+
+// Privacy Policy
+if (currentView === 'privacy') {
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div style={{ backgroundColor: '#0a2351' }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
+          <button onClick={() => setCurrentView('landing')} className="text-blue-200 hover:text-white text-sm transition-colors">← Back</button>
+          <span className="font-bold text-white text-lg">Decide to Run</span>
+        </div>
+      </div>
+      <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
+        <p className="text-sm text-gray-500 mb-8">Last updated: March 2026</p>
+
+        <div className="prose prose-gray max-w-none space-y-6 text-gray-700">
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">1. Who We Are</h2>
+            <p>Decide to Run is operated by CrowdBlue. This Privacy Policy explains how we collect, use, and protect your information when you use our Service.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">2. Information We Collect</h2>
+            <ul className="list-disc pl-6 space-y-1">
+              <li><strong>Account information:</strong> Email address when you create an account.</li>
+              <li><strong>Location data:</strong> ZIP code you enter to look up your districts and local races. We do not store your precise location; it is used only to identify your legislative districts and is not retained.</li>
+              <li><strong>Usage data:</strong> Pages visited, features used, and interactions with the Service, collected via standard server logs.</li>
+              <li><strong>AI conversations:</strong> Messages you send to Eleanor are processed by Anthropic's API to generate responses. We do not store full conversation histories beyond your current session.</li>
+              <li><strong>Saved data:</strong> Offices and campaign plans you choose to save are stored in your account.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">3. How We Use Your Information</h2>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>To provide and improve the Service</li>
+              <li>To personalize your experience (e.g., showing races in your district)</li>
+              <li>To save your preferences and campaign plans across sessions</li>
+              <li>To communicate service updates (only with your consent)</li>
+              <li>To analyze aggregate usage patterns and improve our features</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">4. Third-Party Services</h2>
+            <p>We use the following third-party services, each with their own privacy policies:</p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li><strong>Supabase</strong> — database and authentication</li>
+              <li><strong>Anthropic</strong> — AI responses via the Claude API (messages sent to Eleanor are processed by Anthropic)</li>
+              <li><strong>Cloudflare</strong> — hosting and CDN</li>
+              <li><strong>Federal Election Commission (FEC)</strong> — publicly available candidate data</li>
+              <li><strong>State election authorities</strong> — publicly available candidate filing data</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">5. Data Sharing</h2>
+            <p>We do not sell your personal information. We do not share your information with third parties except: (a) as described above for service providers necessary to operate the Service; (b) when required by law; or (c) with your explicit consent.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">6. Data Retention</h2>
+            <p>We retain your account information for as long as your account is active. You may delete your account at any time by contacting us at <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a>, after which we will delete your personal information within 30 days.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">7. Security</h2>
+            <p>We use industry-standard security measures including encrypted connections (HTTPS) and secure authentication via Supabase. No method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">8. Your Rights</h2>
+            <p>You have the right to access, correct, or delete your personal information. To exercise these rights, contact us at <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a>. If you are in the European Economic Area or California, you may have additional rights under GDPR or CCPA respectively.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">9. Children's Privacy</h2>
+            <p>The Service is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe we have inadvertently collected such information, please contact us immediately.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">10. Changes to This Policy</h2>
+            <p>We may update this Privacy Policy periodically. We will notify you of material changes by posting the updated policy on this page with a revised date.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">11. Contact</h2>
+            <p>Questions about this Privacy Policy? Contact us at <a href="mailto:hello@crowdblue.com" className="text-blue-600 hover:underline">hello@crowdblue.com</a>.</p>
+          </section>
+        </div>
+      </div>
+      <SiteFooter onNavigate={setCurrentView} />
     </div>
   );
 }
