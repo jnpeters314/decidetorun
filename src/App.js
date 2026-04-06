@@ -14,6 +14,16 @@ import { LoginModal } from './components/LoginModal';
   import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng, fetchDistrictRaces } from './utils/ballotpedia';
   import { getLegislatorsForLocation, enrichOfficesWithIncumbents } from './utils/openstates';
 
+// Brand logo mark
+const LogoMark = ({ size = 28 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="24" fill="#1A1A1A"/>
+    <polygon points="16,12 28,12 38,24 28,36 16,36 26,24" fill="#D85A30"/>
+    <rect x="11" y="21" width="7" height="2" rx="1" fill="#D85A30" opacity="0.5"/>
+    <rect x="11" y="25" width="5" height="2" rx="1" fill="#D85A30" opacity="0.3"/>
+  </svg>
+);
+
 // State names mapping
 const STATE_NAMES = {
   'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
@@ -376,17 +386,17 @@ const CompareModal = ({ offices, onClose }) => {
 };
 
 const SiteFooter = ({ onNavigate }) => (
-  <footer style={{ backgroundColor: '#0a2351' }} className="mt-auto">
+  <footer style={{ backgroundColor: '#1A1A1A' }} className="mt-auto">
     <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <span className="text-blue-200 text-sm">© {new Date().getFullYear()} Decide to Run. All rights reserved.</span>
+      <span className="text-gray-300 text-sm">© {new Date().getFullYear()} Decide to Run. All rights reserved.</span>
       <div className="flex items-center gap-6">
-        <button onClick={() => onNavigate('terms')} className="text-blue-200 hover:text-white text-sm transition-colors">
+        <button onClick={() => onNavigate('terms')} className="text-gray-300 hover:text-white text-sm transition-colors">
           Terms of Service
         </button>
-        <button onClick={() => onNavigate('privacy')} className="text-blue-200 hover:text-white text-sm transition-colors">
+        <button onClick={() => onNavigate('privacy')} className="text-gray-300 hover:text-white text-sm transition-colors">
           Privacy Policy
         </button>
-        <button onClick={() => onNavigate('accessibility')} className="text-blue-200 hover:text-white text-sm transition-colors">
+        <button onClick={() => onNavigate('accessibility')} className="text-gray-300 hover:text-white text-sm transition-colors">
           Accessibility
         </button>
       </div>
@@ -399,7 +409,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
   if (currentView === 'landing') return null;
 
   return (
-    <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#0a2351' }}>
+    <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#1A1A1A' }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Breadcrumbs */}
@@ -408,37 +418,37 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
               onClick={() => onNavigate('landing')}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <Flag className="w-6 h-6 text-white" />
-              <span className="font-bold text-lg text-white hidden sm:inline">Decide to Run</span>
+              <LogoMark size={28} />
+              <span className="font-bold text-lg text-white hidden sm:inline" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900, letterSpacing: '0.02em' }}>Decide to Run</span>
             </button>
 
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-sm">
-              <ChevronRight className="w-4 h-4 text-blue-300" />
+              <ChevronRight className="w-4 h-4 text-gray-400" />
               {currentView === 'wizard' && (
-                <span className="text-blue-200">Find Offices</span>
+                <span className="text-gray-300">Find Offices</span>
               )}
               {currentView === 'browse' && (
-                <span className="text-blue-200">Browse States</span>
+                <span className="text-gray-300">Browse States</span>
               )}
               {currentView === 'results' && (
                 <span className="text-white font-medium">Office Results</span>
               )}
               {currentView === 'planToRun' && (
                 <>
-                  <button onClick={() => onNavigate('results')} className="text-blue-300 hover:text-white transition-colors">
+                  <button onClick={() => onNavigate('results')} className="text-gray-400 hover:text-white transition-colors">
                     Results
                   </button>
-                  <ChevronRight className="w-4 h-4 text-blue-300" />
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
                   <span className="text-white font-medium">Campaign Plan</span>
                 </>
               )}
               {currentView === 'chatbot' && (
                 <>
-                  <button onClick={() => onNavigate('results')} className="text-blue-300 hover:text-white transition-colors">
+                  <button onClick={() => onNavigate('results')} className="text-gray-400 hover:text-white transition-colors">
                     Results
                   </button>
-                  <ChevronRight className="w-4 h-4 text-blue-300" />
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
                   <span className="text-white font-medium">Eleanor</span>
                 </>
               )}
@@ -450,7 +460,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
             {currentView !== 'results' && currentView !== 'browse' && (
               <button
                 onClick={() => onNavigate('browse')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-blue-200 hover:text-white transition-colors"
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
               >
                 <Building className="w-4 h-4" />
                 <span className="text-sm font-medium">Browse States</span>
@@ -460,7 +470,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
             {currentView !== 'chatbot' && (
               <button
                 onClick={() => onNavigate('chatbot')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-blue-200 hover:text-white transition-colors"
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">Ask Eleanor</span>
@@ -476,7 +486,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
             ) : (
               <button
                 onClick={onShowLogin}
-                className="flex items-center gap-2 px-4 py-2 text-white font-medium border border-blue-300 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-white font-medium border border-white/30 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors"
               >
                 <LogIn className="w-4 h-4" />
                 <span className="hidden sm:inline">Sign In</span>
@@ -966,18 +976,18 @@ useEffect(() => {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* Top nav bar */}
-        <div style={{ backgroundColor: '#0a2351' }}>
+        <div style={{ backgroundColor: '#1A1A1A' }}>
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Flag className="w-6 h-6 text-white" />
-              <span className="font-bold text-xl text-white tracking-tight">Decide to Run</span>
+              <LogoMark size={32} />
+              <span className="font-bold text-xl text-white" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900, letterSpacing: '0.02em' }}>Decide to Run</span>
             </div>
             {user ? (
               <UserMenu user={user} onSignOut={signOut} onViewSaved={handleViewSavedOffices} />
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-2 px-4 py-2 text-white font-medium border border-blue-300 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors text-sm"
+                className="flex items-center gap-2 px-4 py-2 text-white font-medium border border-white/30 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors text-sm"
               >
                 <LogIn className="w-4 h-4" />
                 Sign In
@@ -988,7 +998,9 @@ useEffect(() => {
 
         {/* Hero */}
         <div className="max-w-6xl mx-auto px-6 pt-14 pb-8 text-center">
-          <h1 className="text-5xl font-bold mb-4" style={{ color: '#0a2351' }}>Decide to Run</h1>
+          <h1 className="text-5xl font-bold mb-4" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900, color: '#1A1A1A', letterSpacing: '0.01em' }}>
+            Decide to <span style={{ color: '#D85A30' }}>Run</span>
+          </h1>
           <p className="text-lg text-gray-500 max-w-xl mx-auto">
             Discover offices you can run for and get everything you need to launch your campaign.
           </p>
@@ -1008,10 +1020,10 @@ useEffect(() => {
             {/* Left: Find an Office */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col gap-6 h-full">
               <div>
-                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-4 text-white" style={{ backgroundColor: '#e8572a' }}>
+                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-4 text-white" style={{ backgroundColor: '#D85A30' }}>
                   I know what I want
                 </span>
-                <h2 className="text-2xl font-bold mb-3" style={{ color: '#0a2351' }}>Find an Office to Run For</h2>
+                <h2 className="text-2xl font-bold mb-3" style={{ color: '#1A1A1A' }}>Find an Office to Run For</h2>
                 <p className="text-gray-500 text-sm leading-relaxed">
                   Search by your zip code or city to see every elected position available near you — with filing deadlines, eligibility requirements, estimated costs, and a personalized campaign plan.
                 </p>
@@ -1019,20 +1031,20 @@ useEffect(() => {
 
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fde8df' }}>
-                    <MapPin className="w-4 h-4" style={{ color: '#e8572a' }} />
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
+                    <MapPin className="w-4 h-4" style={{ color: '#D85A30' }} />
                   </span>
                   Search by zip code to find offices near you
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fde8df' }}>
-                    <Calendar className="w-4 h-4" style={{ color: '#e8572a' }} />
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
+                    <Calendar className="w-4 h-4" style={{ color: '#D85A30' }} />
                   </span>
                   See filing deadlines and eligibility requirements
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fde8df' }}>
-                    <TrendingUp className="w-4 h-4" style={{ color: '#e8572a' }} />
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
+                    <TrendingUp className="w-4 h-4" style={{ color: '#D85A30' }} />
                   </span>
                   Get a personalized campaign plan
                 </div>
@@ -1041,7 +1053,7 @@ useEffect(() => {
               <button
                 onClick={() => setCurrentView('wizard')}
                 className="w-full text-white py-4 px-6 rounded-xl font-bold text-base hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-auto"
-                style={{ backgroundColor: '#0a2351' }}
+                style={{ backgroundColor: '#1A1A1A' }}
               >
                 Search by Location
                 <ArrowRight className="w-5 h-5" />
@@ -1051,7 +1063,7 @@ useEffect(() => {
                 <button
                   onClick={() => setCurrentView('browse')}
                   className="font-medium text-sm hover:underline"
-                  style={{ color: '#0a2351' }}
+                  style={{ color: '#1A1A1A' }}
                 >
                   Or browse offices by state →
                 </button>
@@ -1072,8 +1084,8 @@ useEffect(() => {
 
             {/* Right: Eleanor */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-              <div className="p-6" style={{ backgroundColor: '#0a2351' }}>
-                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 text-white" style={{ backgroundColor: '#e8572a' }}>
+              <div className="p-6" style={{ backgroundColor: '#1A1A1A' }}>
+                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 text-white" style={{ backgroundColor: '#D85A30' }}>
                   I'm not sure where to start
                 </span>
                 <div className="flex items-start gap-3 text-white">
@@ -1082,7 +1094,7 @@ useEffect(() => {
                   </span>
                   <div>
                     <h2 className="text-xl font-bold">Ask Eleanor</h2>
-                    <p className="text-blue-200 text-sm mt-1">Not sure what office to run for, or whether you're eligible? Eleanor can walk you through requirements, deadlines, costs, and next steps — just ask.</p>
+                    <p className="text-gray-300 text-sm mt-1">Not sure what office to run for, or whether you're eligible? Eleanor can walk you through requirements, deadlines, costs, and next steps — just ask.</p>
                   </div>
                 </div>
               </div>
@@ -1096,7 +1108,7 @@ useEffect(() => {
                         <button
                           key={idx}
                           onClick={() => setChatInput(`Tell me about ${topic.toLowerCase()}`)}
-                          className="bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left shadow-sm"
+                          className="bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left shadow-sm"
                         >
                           {topic}
                         </button>
@@ -1107,7 +1119,7 @@ useEffect(() => {
                   chatMessages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs rounded-xl px-4 py-2.5 text-sm ${msg.role === 'user' ? 'text-white' : 'bg-white border border-gray-200 text-gray-800 shadow-sm'}`}
-                        style={msg.role === 'user' ? { backgroundColor: '#0a2351' } : {}}>
+                        style={msg.role === 'user' ? { backgroundColor: '#1A1A1A' } : {}}>
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                       </div>
                     </div>
@@ -1149,7 +1161,7 @@ useEffect(() => {
                     }}
                     placeholder="Ask Eleanor a question..."
                     className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none text-sm bg-gray-50"
-                    style={{ '--tw-ring-color': '#0a2351' }}
+                    style={{ '--tw-ring-color': '#1A1A1A' }}
                     disabled={chatLoading}
                     maxLength={500}
                   />
@@ -1157,7 +1169,7 @@ useEffect(() => {
                     onClick={handleSendChatMessage}
                     disabled={chatLoading || !chatInput.trim()}
                     className="text-white px-4 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center"
-                    style={{ backgroundColor: '#0a2351' }}
+                    style={{ backgroundColor: '#1A1A1A' }}
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -1179,7 +1191,7 @@ useEffect(() => {
   // Browse by State View
   if (currentView === 'browse') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
         <AppHeader 
           currentView={currentView}
           user={user}
@@ -1331,7 +1343,7 @@ useEffect(() => {
     const currentStep = wizardSteps[wizardStep];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
         <AppHeader 
           currentView={currentView}
           user={user}
@@ -1395,7 +1407,7 @@ useEffect(() => {
     const stats = getStatistics();
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
         <AppHeader 
           currentView={currentView}
           user={user}
@@ -1550,7 +1562,7 @@ useEffect(() => {
                         ? 'text-white border-transparent'
                         : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                     }`}
-                    style={filters.level === value ? { backgroundColor: '#0a2351', borderColor: '#0a2351' } : {}}
+                    style={filters.level === value ? { backgroundColor: '#1A1A1A', borderColor: '#1A1A1A' } : {}}
                   >
                     {label}
                   </button>
@@ -2071,7 +2083,7 @@ if (currentView === 'planToRun' && currentPlan) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <AppHeader 
         currentView={currentView}
         user={user}
@@ -2299,7 +2311,7 @@ if (currentView === 'planToRun' && currentPlan) {
 // Chatbot View
 if (currentView === 'chatbot') {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <AppHeader 
         currentView={currentView}
         user={user}
@@ -2399,10 +2411,10 @@ if (currentView === 'chatbot') {
 if (currentView === 'terms') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#0a2351' }}>
+      <div style={{ backgroundColor: '#1A1A1A' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
-          <button onClick={() => setCurrentView('landing')} className="text-blue-200 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg">Decide to Run</span>
+          <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
+          <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
@@ -2480,10 +2492,10 @@ if (currentView === 'terms') {
 if (currentView === 'privacy') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#0a2351' }}>
+      <div style={{ backgroundColor: '#1A1A1A' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
-          <button onClick={() => setCurrentView('landing')} className="text-blue-200 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg">Decide to Run</span>
+          <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
+          <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
@@ -2586,10 +2598,10 @@ if (currentView === 'privacy') {
 if (currentView === 'accessibility') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#0a2351' }}>
+      <div style={{ backgroundColor: '#1A1A1A' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
-          <button onClick={() => setCurrentView('landing')} className="text-blue-200 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg">Decide to Run</span>
+          <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
+          <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
