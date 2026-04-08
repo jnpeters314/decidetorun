@@ -705,6 +705,8 @@ function App() {
   const [uncontestedLoaded, setUncontestedLoaded] = useState(false);
   const [uncontestedFilters, setUncontestedFilters] = useState({ level: 'all', state: '', searchTerm: '' });
   const [expandedFiling, setExpandedFiling] = useState(new Set());
+  const [openStatesRaces, setOpenStatesRaces] = useState([]);
+  const [openStatesLoading, setOpenStatesLoading] = useState(false);
 
   // Fetch all offices with no candidates
   useEffect(() => {
@@ -724,6 +726,29 @@ function App() {
         });
     }
   }, [currentView, uncontestedLoaded]);
+
+  // Fetch OpenStates state legislature races when a state filter is selected
+  useEffect(() => {
+    if (!uncontestedFilters.state) {
+      setOpenStatesRaces([]);
+      return;
+    }
+    setOpenStatesLoading(true);
+    fetch(`${process.env.REACT_APP_SUPABASE_URL}/functions/v1/get-uncontested-state-races`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ state: uncontestedFilters.state }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        setOpenStatesRaces(data.races ?? []);
+        setOpenStatesLoading(false);
+      })
+      .catch(() => setOpenStatesLoading(false));
+  }, [uncontestedFilters.state]);
 
   useEffect(() => {
     const loadStates = async () => {
@@ -2862,6 +2887,29 @@ if (currentView === 'uncontested') {
     return true;
   });
 
+  const filteredOpenStates = openStatesRaces.filter(office => {
+    if (uncontestedFilters.level !== 'all' && office.level !== uncontestedFilters.level) return false;
+    if (uncontestedFilters.state && office.state !== uncontestedFilters.state) return false;
+    if (uncontestedFilters.searchTerm) {
+      const term = uncontestedFilters.searchTerm.toLowerCase();
+      return (
+        office.title?.toLowerCase().includes(term) ||
+        String(office.district || '').toLowerCase().includes(term) ||
+        STATE_NAMES[office.state]?.toLowerCase().includes(term)
+      );
+    }
+    return true;
+  });
+
+  // Merge, deduplicate by id (sos_candidates data wins over OpenStates)
+  const existingIds = new Set(filteredUncontested.map(o => o.id));
+  const mergedUncontested = [
+    ...filteredUncontested,
+    ...filteredOpenStates.filter(o => !existingIds.has(o.id)),
+  ];
+
+  const hasOpenStatesData = filteredOpenStates.length > 0;
+
   // Unique states present in results for the state dropdown
   const statesInResults = [...new Set(uncontestedOffices.map(o => o.state).filter(Boolean))].sort();
 
@@ -2939,8 +2987,8 @@ if (currentView === 'uncontested') {
 
           {!uncontestedLoading && (
             <p className="text-sm text-gray-400 mt-3">
-              Showing <span className="font-semibold text-gray-700">{filteredUncontested.length}</span> of{' '}
-              <span className="font-semibold text-gray-700">{uncontestedOffices.length}</span> uncontested races
+              Showing <span className="font-semibold text-gray-700">{mergedUncontested.length}</span> of{' '}
+              <span className="font-semibold text-gray-700">{uncontestedOffices.length + openStatesRaces.length}</span> uncontested races
             </p>
           )}
         </div>
@@ -2953,8 +3001,19 @@ if (currentView === 'uncontested') {
           </div>
         )}
 
+        {/* OpenStates info banner */}
+        {hasOpenStatesData && !openStatesLoading && (
+          <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 mb-4 text-sm text-blue-800 flex flex-wrap items-center gap-2">
+            <span className="font-semibold">State legislature races from OpenStates.</span>
+            <span>
+              Races marked <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 mx-1">No candidates filed</span> are confirmed via SoS data.
+              Races marked <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 mx-1">Unverified</span> are based on incumbent roster only — candidate filing data for this state may not yet be imported.
+            </span>
+          </div>
+        )}
+
         {/* Empty state */}
-        {!uncontestedLoading && filteredUncontested.length === 0 && (
+        {!uncontestedLoading && !openStatesLoading && mergedUncontested.length === 0 && (
           <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
             <Flag className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 font-medium">No races match your filters.</p>
@@ -2969,8 +3028,9 @@ if (currentView === 'uncontested') {
 
         {/* Race cards */}
         <div className="space-y-4">
-          {filteredUncontested.map(office => {
-            const { steps, links } = getFilingInfo(office);
+          {mergedUncontested.map(office => {
+            const isOpenStates = office.data_source === 'OpenStates';
+            const { steps, links } = isOpenStates ? { steps: [], links: [] } : getFilingInfo(office);
             const isExpanded = expandedFiling.has(office.id);
             const levelColor =
               office.level === 'federal'    ? 'bg-purple-100 text-purple-700' :
@@ -2988,13 +3048,20 @@ if (currentView === 'uncontested') {
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${levelColor}`}>
                         {office.level?.charAt(0).toUpperCase() + office.level?.slice(1)}
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                        No candidates filed
-                      </span>
+                      {isOpenStates && !office.verified_uncontested ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                          Unverified
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                          No candidates filed
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-500">
                       {STATE_NAMES[office.state] || office.state}
                       {office.district && office.office_type !== 'senate' ? ` · District ${office.district}` : ''}
+                      {isOpenStates && office.incumbent ? ` · Incumbent: ${office.incumbent}` : ''}
                     </p>
                   </div>
                 </div>
@@ -3025,18 +3092,30 @@ if (currentView === 'uncontested') {
                   )}
                 </div>
 
-                {/* Filing plan toggle */}
-                <button
-                  onClick={() => toggleFiling(office.id)}
-                  className="flex items-center gap-2 text-sm font-medium transition-colors"
-                  style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
-                >
-                  <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                  {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
-                </button>
+                {/* Filing plan toggle — OpenStates cards skip the plan drawer */}
+                {!isOpenStates && (
+                  <button
+                    onClick={() => toggleFiling(office.id)}
+                    className="flex items-center gap-2 text-sm font-medium transition-colors"
+                    style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
+                  >
+                    <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
+                  </button>
+                )}
+
+                {isOpenStates && (
+                  <button
+                    onClick={() => { setSelectedOffice(office); setCurrentPlan(getCampaignPlanTemplate(office)); setCurrentView('planToRun'); }}
+                    className="text-sm font-medium transition-colors"
+                    style={{ color: '#D85A30' }}
+                  >
+                    Build Campaign Plan →
+                  </button>
+                )}
 
                 {/* Expanded filing plan */}
-                {isExpanded && (
+                {!isOpenStates && isExpanded && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="grid sm:grid-cols-2 gap-6">
                       {/* Steps */}
@@ -3096,6 +3175,14 @@ if (currentView === 'uncontested') {
             );
           })}
         </div>
+
+        {/* OpenStates loading spinner */}
+        {openStatesLoading && (
+          <div className="text-center py-8 text-gray-500">
+            <div className="inline-block w-6 h-6 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-2" />
+            <p className="text-sm">Loading state legislature races from OpenStates…</p>
+          </div>
+        )}
       </div>
       <SiteFooter onNavigate={setCurrentView} />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
