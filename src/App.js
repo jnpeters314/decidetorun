@@ -38,11 +38,113 @@ const STATE_NAMES = {
   'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
 };
 
+// State election filing authority links
+const STATE_FILING_LINKS = {
+  AL: 'https://www.sos.alabama.gov/alabama-votes/candidates',
+  AK: 'https://elections.alaska.gov/candidates/',
+  AZ: 'https://azsos.gov/elections/running-for-office',
+  AR: 'https://www.sos.arkansas.gov/elections/candidates-ballot-access',
+  CA: 'https://www.sos.ca.gov/elections/candidate-filing',
+  CO: 'https://www.coloradosos.gov/pubs/elections/candidates/candidateInfo.html',
+  CT: 'https://portal.ct.gov/SOTS/Election-Services/Candidate-Information/Candidate-Information',
+  DE: 'https://elections.delaware.gov/candidate/index.shtml',
+  FL: 'https://dos.fl.gov/elections/candidates/',
+  GA: 'https://sos.ga.gov/page/candidates',
+  HI: 'https://elections.hawaii.gov/candidates/',
+  ID: 'https://sos.idaho.gov/elect-div/candidate-filing/',
+  IL: 'https://www.elections.il.gov/candidacyinfo/candidateinformation.aspx',
+  IN: 'https://www.in.gov/sos/elections/candidate-information/',
+  IA: 'https://sos.iowa.gov/elections/candidates/index.html',
+  KS: 'https://sos.ks.gov/elections/candidate-info.html',
+  KY: 'https://elect.ky.gov/candidates/Pages/default.aspx',
+  LA: 'https://www.sos.la.gov/ElectionsAndVoting/BecomeACandidate/Pages/default.aspx',
+  ME: 'https://www.maine.gov/sos/cec/elec/candidate/index.html',
+  MD: 'https://elections.maryland.gov/elections/2026/index.html',
+  MA: 'https://www.sec.state.ma.us/ele/elecnd/ndinx.htm',
+  MI: 'https://mvic.sos.state.mi.us/Candidate',
+  MN: 'https://www.sos.state.mn.us/elections-voting/filing-for-office/',
+  MS: 'https://www.sos.ms.gov/elections-voting/candidate-filing',
+  MO: 'https://www.sos.mo.gov/elections/candidates/candidateInfo',
+  MT: 'https://sosmt.gov/elections/candidates/',
+  NE: 'https://sos.nebraska.gov/elections/candidate-information',
+  NV: 'https://www.nvsos.gov/sos/elections/running-for-office',
+  NH: 'https://www.sos.nh.gov/elections/candidates',
+  NJ: 'https://www.njelections.org/candidate-info/candidate-info.html',
+  NM: 'https://www.sos.nm.gov/voting-and-elections/candidate-and-voter-information/',
+  NY: 'https://www.elections.ny.gov/running-for-office.html',
+  NC: 'https://www.ncsbe.gov/candidates',
+  ND: 'https://vip.sos.nd.gov/PortalListDetails.aspx?ptlhPKID=49&ptlPKID=7',
+  OH: 'https://www.ohiosos.gov/elections/candidates/',
+  OK: 'https://www.elections.ok.gov/candidates/',
+  OR: 'https://sos.oregon.gov/elections/Pages/running-for-office.aspx',
+  PA: 'https://www.vote.pa.gov/Resources/Pages/Candidate-Running-For-Office.aspx',
+  RI: 'https://vote.sos.ri.gov/Home/RunningForOffice',
+  SC: 'https://www.scvotes.gov/candidates',
+  SD: 'https://sdsos.gov/elections-voting/candidates/default.aspx',
+  TN: 'https://sos.tn.gov/elections/candidates',
+  TX: 'https://www.sos.state.tx.us/elections/candidates/guide/index.shtml',
+  UT: 'https://elections.utah.gov/candidates',
+  VT: 'https://sos.vermont.gov/elections/candidates/',
+  VA: 'https://www.elections.virginia.gov/candidatepac-info/',
+  WA: 'https://www.sos.wa.gov/elections/candidates/',
+  WV: 'https://sos.wv.gov/elections/Pages/CandidateInformation.aspx',
+  WI: 'https://elections.wi.gov/candidates',
+  WY: 'https://sos.wyo.gov/elections/candidates.aspx',
+};
+
+// Generate filing steps and links for an uncontested office
+const getFilingInfo = (office) => {
+  const isFederal = office.level === 'federal';
+  const stateUrl = STATE_FILING_LINKS[office.state];
+  const stateName = STATE_NAMES[office.state] || office.state;
+
+  const steps = [
+    `Verify eligibility: age ${office.min_age || 18}+, citizenship, and residency requirements for ${stateName}`,
+    `Review the filing deadline: ${office.filing_deadline ? new Date(office.filing_deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'check with your state'}`,
+    'Open a dedicated campaign bank account before collecting any funds',
+    isFederal
+      ? 'File a Statement of Candidacy (FEC Form 2) and Statement of Organization (FEC Form 1) with the FEC'
+      : `File a Declaration of Candidacy with the ${stateName} election authority`,
+    'Designate a campaign treasurer',
+  ];
+
+  const links = [];
+  if (isFederal) {
+    links.push({
+      label: 'FEC Candidate Registration',
+      url: 'https://www.fec.gov/help-candidates-and-committees/candidate-taking-receipts/registering-candidate/',
+      note: 'Register and get your FEC ID',
+    });
+    links.push({
+      label: 'FEC Electronic Filing',
+      url: 'https://efts.fec.gov/EASE/login',
+      note: 'File FEC Form 1 & 2 online',
+    });
+  }
+  if (stateUrl) {
+    links.push({
+      label: `${stateName} Election Authority`,
+      url: stateUrl,
+      note: isFederal ? 'State-level requirements (ballot access)' : 'State filing forms and requirements',
+    });
+  }
+  if (isFederal || office.level === 'statewide') {
+    links.push({
+      label: 'FEC Campaign Finance Guide',
+      url: 'https://www.fec.gov/help-candidates-and-committees/',
+      note: 'Contribution limits, reporting deadlines',
+    });
+  }
+
+  return { steps, links };
+};
+
 // View <-> URL mapping for browser history
 const VIEW_URLS = {
   landing:       '/',
   wizard:        '/start',
   browse:        '/browse',
+  uncontested:   '/uncontested',
   results:       '/results',
   planToRun:     '/plan',
   chatbot:       '/chat',
@@ -431,6 +533,9 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
               {currentView === 'browse' && (
                 <span className="text-gray-300">Browse States</span>
               )}
+              {currentView === 'uncontested' && (
+                <span className="text-white font-medium">Run Unopposed</span>
+              )}
               {currentView === 'results' && (
                 <span className="text-white font-medium">Office Results</span>
               )}
@@ -464,6 +569,16 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
               >
                 <Building className="w-4 h-4" />
                 <span className="text-sm font-medium">Browse States</span>
+              </button>
+            )}
+
+            {currentView !== 'uncontested' && (
+              <button
+                onClick={() => onNavigate('uncontested')}
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
+              >
+                <Flag className="w-4 h-4" />
+                <span className="text-sm font-medium">Run Unopposed</span>
               </button>
             )}
 
@@ -585,6 +700,31 @@ function App() {
   const [browseMode, setBrowseMode] = useState(false);
   const [browseState, setBrowseState] = useState('');
   const [availableStates, setAvailableStates] = useState([]);
+  const [uncontestedOffices, setUncontestedOffices] = useState([]);
+  const [uncontestedLoading, setUncontestedLoading] = useState(false);
+  const [uncontestedLoaded, setUncontestedLoaded] = useState(false);
+  const [uncontestedFilters, setUncontestedFilters] = useState({ level: 'all', state: '', searchTerm: '' });
+  const [expandedFiling, setExpandedFiling] = useState(new Set());
+
+  // Fetch all offices with no candidates
+  useEffect(() => {
+    if (currentView === 'uncontested' && !uncontestedLoaded) {
+      setUncontestedLoading(true);
+      supabase
+        .from('offices')
+        .select('*')
+        .or('total_candidates.is.null,total_candidates.eq.0')
+        .order('state', { ascending: true })
+        .then(({ data, error }) => {
+          if (!error && data) {
+            setUncontestedOffices(data);
+            setUncontestedLoaded(true);
+          }
+          setUncontestedLoading(false);
+        });
+    }
+  }, [currentView, uncontestedLoaded]);
+
   useEffect(() => {
     const loadStates = async () => {
       const states = await simulatedBackend.getAllStates();
@@ -1179,7 +1319,27 @@ useEffect(() => {
 
           </div>
 
-          <div className="text-center mt-8 text-xs text-gray-400">
+          {/* Uncontested races callout */}
+          <div className="mt-8 max-w-xl mx-auto bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#fbe8e0' }}>
+                <Flag className="w-4 h-4" style={{ color: '#D85A30' }} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Races with zero candidates</p>
+                <p className="text-xs text-gray-400">See every office where no one has filed yet</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentView('uncontested')}
+              className="flex-shrink-0 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: '#D85A30' }}
+            >
+              View races →
+            </button>
+          </div>
+
+          <div className="text-center mt-6 text-xs text-gray-400">
             Free to use · Covers all 50 states · Real FEC data
           </div>
         </div>
@@ -2674,6 +2834,271 @@ if (currentView === 'accessibility') {
         </div>
       </div>
       <SiteFooter onNavigate={setCurrentView} />
+    </div>
+  );
+}
+
+// Uncontested Races View
+if (currentView === 'uncontested') {
+  const levelLabels = {
+    all: 'All Levels',
+    federal: 'Federal',
+    statewide: 'Statewide',
+    state: 'State Legislature',
+    local: 'Local',
+  };
+
+  const filteredUncontested = uncontestedOffices.filter(office => {
+    if (uncontestedFilters.level !== 'all' && office.level !== uncontestedFilters.level) return false;
+    if (uncontestedFilters.state && office.state !== uncontestedFilters.state) return false;
+    if (uncontestedFilters.searchTerm) {
+      const term = uncontestedFilters.searchTerm.toLowerCase();
+      return (
+        office.title?.toLowerCase().includes(term) ||
+        String(office.district || '').toLowerCase().includes(term) ||
+        STATE_NAMES[office.state]?.toLowerCase().includes(term)
+      );
+    }
+    return true;
+  });
+
+  // Unique states present in results for the state dropdown
+  const statesInResults = [...new Set(uncontestedOffices.map(o => o.state).filter(Boolean))].sort();
+
+  const toggleFiling = (id) => {
+    setExpandedFiling(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <AppHeader
+        currentView={currentView}
+        user={user}
+        onNavigate={setCurrentView}
+        onSignOut={signOut}
+        onViewSaved={handleViewSavedOffices}
+        onShowLogin={() => setShowLoginModal(true)}
+      />
+      <div className="max-w-5xl mx-auto px-4 py-8">
+
+        {/* Page header */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full" style={{ backgroundColor: '#fbe8e0' }}>
+              <Flag className="w-5 h-5" style={{ color: '#D85A30' }} />
+            </span>
+            <h1 className="text-3xl font-bold text-gray-900">Races With No Candidates Yet</h1>
+          </div>
+          <p className="text-gray-500 mb-6 max-w-2xl">
+            These offices currently have zero filed candidates — meaning you could run unopposed.
+            Each card includes a filing plan and direct links to the official filing authority.
+          </p>
+
+          {/* Level filter pills */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {Object.entries(levelLabels).map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setUncontestedFilters(f => ({ ...f, level: value }))}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                  uncontestedFilters.level === value
+                    ? 'text-white border-transparent'
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
+                style={uncontestedFilters.level === value ? { backgroundColor: '#1A1A1A', borderColor: '#1A1A1A' } : {}}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* State + city/search row */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <select
+              value={uncontestedFilters.state}
+              onChange={e => setUncontestedFilters(f => ({ ...f, state: e.target.value }))}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:outline-none bg-white"
+            >
+              <option value="">All States</option>
+              {statesInResults.map(code => (
+                <option key={code} value={code}>{STATE_NAMES[code] || code}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Search by city, district, or office name…"
+              value={uncontestedFilters.searchTerm}
+              onChange={e => setUncontestedFilters(f => ({ ...f, searchTerm: e.target.value }))}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:outline-none"
+            />
+          </div>
+
+          {!uncontestedLoading && (
+            <p className="text-sm text-gray-400 mt-3">
+              Showing <span className="font-semibold text-gray-700">{filteredUncontested.length}</span> of{' '}
+              <span className="font-semibold text-gray-700">{uncontestedOffices.length}</span> uncontested races
+            </p>
+          )}
+        </div>
+
+        {/* Loading state */}
+        {uncontestedLoading && (
+          <div className="text-center py-16 text-gray-500">
+            <div className="inline-block w-8 h-8 border-4 border-gray-200 border-t-gray-500 rounded-full animate-spin mb-3" />
+            <p>Loading uncontested races…</p>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!uncontestedLoading && filteredUncontested.length === 0 && (
+          <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+            <Flag className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">No races match your filters.</p>
+            <button
+              onClick={() => setUncontestedFilters({ level: 'all', state: '', searchTerm: '' })}
+              className="mt-3 text-sm underline text-gray-400 hover:text-gray-600"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+
+        {/* Race cards */}
+        <div className="space-y-4">
+          {filteredUncontested.map(office => {
+            const { steps, links } = getFilingInfo(office);
+            const isExpanded = expandedFiling.has(office.id);
+            const levelColor =
+              office.level === 'federal'    ? 'bg-purple-100 text-purple-700' :
+              office.level === 'statewide'  ? 'bg-indigo-100 text-indigo-700' :
+              office.level === 'state'      ? 'bg-blue-100 text-blue-700' :
+                                              'bg-green-100 text-green-700';
+
+            return (
+              <div key={office.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                {/* Card header */}
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900">{office.title}</h3>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${levelColor}`}>
+                        {office.level?.charAt(0).toUpperCase() + office.level?.slice(1)}
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                        No candidates filed
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {STATE_NAMES[office.state] || office.state}
+                      {office.district && office.office_type !== 'senate' ? ` · District ${office.district}` : ''}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Key info grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4 text-sm">
+                  {office.filing_deadline && (
+                    <div>
+                      <p className="text-gray-400 text-xs mb-0.5">Filing Deadline</p>
+                      <p className="font-medium text-gray-800">
+                        {new Date(office.filing_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                  )}
+                  {office.next_election && (
+                    <div>
+                      <p className="text-gray-400 text-xs mb-0.5">Election Date</p>
+                      <p className="font-medium text-gray-800">
+                        {new Date(office.next_election).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                  )}
+                  {office.estimated_cost && (
+                    <div>
+                      <p className="text-gray-400 text-xs mb-0.5">Est. Budget</p>
+                      <p className="font-medium text-gray-800">{office.estimated_cost}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Filing plan toggle */}
+                <button
+                  onClick={() => toggleFiling(office.id)}
+                  className="flex items-center gap-2 text-sm font-medium transition-colors"
+                  style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
+                >
+                  <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
+                </button>
+
+                {/* Expanded filing plan */}
+                {isExpanded && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      {/* Steps */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
+                          <AlertCircle className="w-4 h-4 text-gray-400" />
+                          Key Filing Steps
+                        </h4>
+                        <ol className="space-y-2">
+                          {steps.map((step, i) => (
+                            <li key={i} className="flex gap-2 text-sm text-gray-600">
+                              <span className="flex-shrink-0 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white mt-0.5" style={{ backgroundColor: '#1A1A1A' }}>
+                                {i + 1}
+                              </span>
+                              {step}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+
+                      {/* Links */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
+                          <ArrowRight className="w-4 h-4 text-gray-400" />
+                          Official Filing Resources
+                        </h4>
+                        <div className="space-y-2">
+                          {links.map((link, i) => (
+                            <a
+                              key={i}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-start gap-2 p-3 rounded-lg border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-colors group"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-800 group-hover:underline">{link.label}</p>
+                                <p className="text-xs text-gray-400">{link.note}</p>
+                              </div>
+                              <ArrowRight className="w-4 h-4 text-gray-400 shrink-0 mt-0.5 group-hover:translate-x-0.5 transition-transform" />
+                            </a>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={() => { setSelectedOffice(office); setCurrentPlan(getCampaignPlanTemplate(office)); setCurrentView('planToRun'); }}
+                          className="mt-3 w-full text-sm font-medium text-white py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity"
+                          style={{ backgroundColor: '#D85A30' }}
+                        >
+                          Build Full Campaign Plan →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <SiteFooter onNavigate={setCurrentView} />
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>
   );
 }
