@@ -8,6 +8,7 @@ import {
 import { supabase } from './supabaseClient';
 import { useAuth } from './AuthContext';
 import { LoginModal } from './components/LoginModal';
+import { SubmitRaceModal } from './components/SubmitRaceModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
@@ -707,6 +708,8 @@ function App() {
   const [expandedFiling, setExpandedFiling] = useState(new Set());
   const [openStatesRaces, setOpenStatesRaces] = useState([]);
   const [openStatesLoading, setOpenStatesLoading] = useState(false);
+  const [communityRaces, setCommunityRaces] = useState([]);
+  const [showSubmitRaceModal, setShowSubmitRaceModal] = useState(false);
 
   // Fetch all offices with no candidates
   useEffect(() => {
@@ -726,6 +729,37 @@ function App() {
         });
     }
   }, [currentView, uncontestedLoaded]);
+
+  // Fetch community-submitted races on first visit to uncontested view
+  useEffect(() => {
+    if (currentView !== 'uncontested') return;
+    supabase
+      .from('submitted_races')
+      .select('*')
+      .eq('status', 'published')
+      .then(({ data }) => {
+        if (data) {
+          setCommunityRaces(data.map(r => ({
+            id: `community-${r.id}`,
+            title: r.office_title,
+            level: r.level,
+            state: r.state,
+            district: r.district || r.city || null,
+            office_type: r.level,
+            next_election: r.next_election || null,
+            filing_deadline: r.filing_deadline || null,
+            estimated_cost: null,
+            incumbent: null,
+            total_candidates: 0,
+            candidates_running: [],
+            confidence: 'community',
+            data_source: 'community',
+            source_url: r.source_url || null,
+            notes: r.notes || null,
+          })));
+        }
+      });
+  }, [currentView]);
 
   // Fetch OpenStates state legislature races when a state filter is selected
   useEffect(() => {
@@ -1344,24 +1378,45 @@ useEffect(() => {
 
           </div>
 
-          {/* Uncontested races callout */}
-          <div className="mt-8 max-w-xl mx-auto bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#fbe8e0' }}>
-                <Flag className="w-4 h-4" style={{ color: '#D85A30' }} />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-gray-800">Races with zero candidates</p>
-                <p className="text-xs text-gray-400">See every office where no one has filed yet</p>
+          {/* Bottom callouts */}
+          <div className="mt-8 max-w-xl mx-auto space-y-3">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#fbe8e0' }}>
+                  <Flag className="w-4 h-4" style={{ color: '#D85A30' }} />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">Races with zero candidates</p>
+                  <p className="text-xs text-gray-400">See every office where no one has filed yet</p>
+                </div>
               </div>
+              <button
+                onClick={() => setCurrentView('uncontested')}
+                className="flex-shrink-0 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#D85A30' }}
+              >
+                View races →
+              </button>
             </div>
-            <button
-              onClick={() => setCurrentView('uncontested')}
-              className="flex-shrink-0 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#D85A30' }}
-            >
-              View races →
-            </button>
+
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f3f4f6' }}>
+                  <Users className="w-4 h-4 text-gray-500" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">Know a race we're missing?</p>
+                  <p className="text-xs text-gray-400">Help others find it by submitting it to the platform</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSubmitRaceModal(true)}
+                className="flex-shrink-0 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#1A1A1A' }}
+              >
+                Submit a race →
+              </button>
+            </div>
           </div>
 
           <div className="text-center mt-6 text-xs text-gray-400">
@@ -1369,6 +1424,7 @@ useEffect(() => {
           </div>
         </div>
       <SiteFooter onNavigate={setCurrentView} />
+      <SubmitRaceModal isOpen={showSubmitRaceModal} onClose={() => setShowSubmitRaceModal(false)} />
       </div>
     );
   }
@@ -2902,10 +2958,26 @@ if (currentView === 'uncontested') {
   });
 
   // Merge, deduplicate by id (sos_candidates data wins over OpenStates)
+  const filteredCommunity = communityRaces.filter(office => {
+    if (uncontestedFilters.level !== 'all' && office.level !== uncontestedFilters.level) return false;
+    if (uncontestedFilters.state && office.state !== uncontestedFilters.state) return false;
+    if (uncontestedFilters.searchTerm) {
+      const term = uncontestedFilters.searchTerm.toLowerCase();
+      return (
+        office.title?.toLowerCase().includes(term) ||
+        String(office.district || '').toLowerCase().includes(term) ||
+        STATE_NAMES[office.state]?.toLowerCase().includes(term)
+      );
+    }
+    return true;
+  });
+
   const existingIds = new Set(filteredUncontested.map(o => o.id));
+  const afterOpenStates = [...filteredUncontested, ...filteredOpenStates.filter(o => !existingIds.has(o.id))];
+  const afterOpenStatesIds = new Set(afterOpenStates.map(o => o.id));
   const mergedUncontested = [
-    ...filteredUncontested,
-    ...filteredOpenStates.filter(o => !existingIds.has(o.id)),
+    ...afterOpenStates,
+    ...filteredCommunity.filter(o => !afterOpenStatesIds.has(o.id)),
   ];
 
   const hasOpenStatesData = filteredOpenStates.length > 0;
@@ -2935,15 +3007,26 @@ if (currentView === 'uncontested') {
 
         {/* Page header */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full" style={{ backgroundColor: '#fbe8e0' }}>
-              <Flag className="w-5 h-5" style={{ color: '#D85A30' }} />
-            </span>
-            <h1 className="text-3xl font-bold text-gray-900">Races With No Candidates Yet</h1>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
+                <Flag className="w-5 h-5" style={{ color: '#D85A30' }} />
+              </span>
+              <h1 className="text-3xl font-bold text-gray-900">Races With No Candidates Yet</h1>
+            </div>
+            <button
+              onClick={() => setShowSubmitRaceModal(true)}
+              className="shrink-0 flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: '#D85A30' }}
+            >
+              <Flag className="w-4 h-4" />
+              Submit a Race
+            </button>
           </div>
           <p className="text-gray-500 mb-6 max-w-2xl">
             These offices currently have zero filed candidates — meaning you could run unopposed.
             Each card includes a filing plan and direct links to the official filing authority.
+            Know one we're missing? Submit it to help others find it.
           </p>
 
           {/* Level filter pills */}
@@ -3030,7 +3113,8 @@ if (currentView === 'uncontested') {
         <div className="space-y-4">
           {mergedUncontested.map(office => {
             const isOpenStates = office.data_source === 'OpenStates';
-            const { steps, links } = isOpenStates ? { steps: [], links: [] } : getFilingInfo(office);
+            const isCommunity = office.data_source === 'community';
+            const { steps, links } = (isOpenStates || isCommunity) ? { steps: [], links: [] } : getFilingInfo(office);
             const isExpanded = expandedFiling.has(office.id);
             const levelColor =
               office.level === 'federal'    ? 'bg-purple-100 text-purple-700' :
@@ -3048,7 +3132,11 @@ if (currentView === 'uncontested') {
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${levelColor}`}>
                         {office.level?.charAt(0).toUpperCase() + office.level?.slice(1)}
                       </span>
-                      {isOpenStates && !office.verified_uncontested ? (
+                      {isCommunity ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          Community Submitted
+                        </span>
+                      ) : isOpenStates && !office.verified_uncontested ? (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
                           Unverified
                         </span>
@@ -3062,6 +3150,7 @@ if (currentView === 'uncontested') {
                       {STATE_NAMES[office.state] || office.state}
                       {office.district && office.office_type !== 'senate' ? ` · District ${office.district}` : ''}
                       {isOpenStates && office.incumbent ? ` · Incumbent: ${office.incumbent}` : ''}
+                      {isCommunity && office.notes ? ` · ${office.notes}` : ''}
                     </p>
                   </div>
                 </div>
@@ -3092,30 +3181,41 @@ if (currentView === 'uncontested') {
                   )}
                 </div>
 
-                {/* Filing plan toggle — OpenStates cards skip the plan drawer */}
-                {!isOpenStates && (
-                  <button
-                    onClick={() => toggleFiling(office.id)}
-                    className="flex items-center gap-2 text-sm font-medium transition-colors"
-                    style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
-                  >
-                    <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                    {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
-                  </button>
-                )}
-
-                {isOpenStates && (
-                  <button
-                    onClick={() => { setSelectedOffice(office); setCurrentPlan(getCampaignPlanTemplate(office)); setCurrentView('planToRun'); }}
-                    className="text-sm font-medium transition-colors"
-                    style={{ color: '#D85A30' }}
-                  >
-                    Build Campaign Plan →
-                  </button>
-                )}
+                {/* Filing plan / actions */}
+                <div className="flex flex-wrap items-center gap-4">
+                  {!isOpenStates && !isCommunity && (
+                    <button
+                      onClick={() => toggleFiling(office.id)}
+                      className="flex items-center gap-2 text-sm font-medium transition-colors"
+                      style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
+                    >
+                      <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                      {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
+                    </button>
+                  )}
+                  {(isOpenStates || isCommunity) && (
+                    <button
+                      onClick={() => { setSelectedOffice(office); setCurrentPlan(getCampaignPlanTemplate(office)); setCurrentView('planToRun'); }}
+                      className="text-sm font-medium transition-colors"
+                      style={{ color: '#D85A30' }}
+                    >
+                      Build Campaign Plan →
+                    </button>
+                  )}
+                  {isCommunity && office.source_url && (
+                    <a
+                      href={office.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-400 hover:text-gray-600 underline transition-colors"
+                    >
+                      Source →
+                    </a>
+                  )}
+                </div>
 
                 {/* Expanded filing plan */}
-                {!isOpenStates && isExpanded && (
+                {!isOpenStates && !isCommunity && isExpanded && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="grid sm:grid-cols-2 gap-6">
                       {/* Steps */}
@@ -3186,6 +3286,7 @@ if (currentView === 'uncontested') {
       </div>
       <SiteFooter onNavigate={setCurrentView} />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <SubmitRaceModal isOpen={showSubmitRaceModal} onClose={() => setShowSubmitRaceModal(false)} />
     </div>
   );
 }
