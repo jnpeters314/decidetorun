@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  CheckCircle, AlertCircle, Info, ChevronRight, MapPin, 
-  Building, Flag, User, ArrowRight, MessageCircle, Send, 
+import {
+  CheckCircle, AlertCircle, Info, ChevronRight, MapPin,
+  Building, Flag, User, ArrowRight, MessageCircle, Send,
   BookOpen, DollarSign, Calendar, TrendingUp, Users, Heart,
-  Share2, BarChart2, LogOut, LogIn, X
+  Share2, BarChart2, LogOut, LogIn, X, Menu, Bell
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import { useAuth } from './AuthContext';
 import { LoginModal } from './components/LoginModal';
 import { SubmitRaceModal } from './components/SubmitRaceModal';
+import { RaceAlertModal } from './components/RaceAlertModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
   import { generateCampaignPlanPDF } from './utils/pdfGenerator';
@@ -152,6 +153,7 @@ const VIEW_URLS = {
   terms:         '/terms',
   privacy:       '/privacy',
   accessibility: '/accessibility',
+  admin:         '/admin',
 };
 const URL_TO_VIEW = Object.fromEntries(
   Object.entries(VIEW_URLS).map(([view, url]) => [url, view])
@@ -202,7 +204,7 @@ const attachSosCandidates = (offices, sosRecords) => {
   });
 };
 
-const simulatedBackend = {
+const dataBackend = {
   getOffices: async (zipCode, state) => {
     const { data, error } = await supabase
       .from('offices')
@@ -418,7 +420,8 @@ const CompareModal = ({ offices, onClose }) => {
               </p>
               <button
                 onClick={onClose}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                className="text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#1A1A1A' }}
               >
                 Got It
               </button>
@@ -509,14 +512,30 @@ const SiteFooter = ({ onNavigate }) => (
 
 // Persistent Header Component
 const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onShowLogin }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   if (currentView === 'landing') return null;
+
+  const navItems = [
+    { view: 'browse',      label: 'Browse States', icon: Building },
+    { view: 'uncontested', label: 'Run Unopposed',  icon: Flag },
+    { view: 'chatbot',     label: 'Ask Eleanor',    icon: MessageCircle },
+  ].filter(item => item.view !== currentView);
+
+  const breadcrumb = {
+    wizard:      'Find Offices',
+    browse:      'Browse States',
+    uncontested: 'Run Unopposed',
+    results:     'Office Results',
+    planToRun:   'Campaign Plan',
+    chatbot:     'Eleanor',
+  }[currentView];
 
   return (
     <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#1A1A1A' }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo & Breadcrumbs */}
-          <div className="flex items-center gap-4">
+          {/* Logo & Breadcrumb */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => onNavigate('landing')}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -524,93 +543,94 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
               <LogoMark size={28} />
               <span className="font-bold text-lg text-white hidden sm:inline" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900, letterSpacing: '0.02em' }}>Decide to Run</span>
             </button>
-
-            {/* Breadcrumbs */}
-            <div className="flex items-center gap-2 text-sm">
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-              {currentView === 'wizard' && (
-                <span className="text-gray-300">Find Offices</span>
-              )}
-              {currentView === 'browse' && (
-                <span className="text-gray-300">Browse States</span>
-              )}
-              {currentView === 'uncontested' && (
-                <span className="text-white font-medium">Run Unopposed</span>
-              )}
-              {currentView === 'results' && (
-                <span className="text-white font-medium">Office Results</span>
-              )}
-              {currentView === 'planToRun' && (
-                <>
-                  <button onClick={() => onNavigate('results')} className="text-gray-400 hover:text-white transition-colors">
-                    Results
-                  </button>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                  <span className="text-white font-medium">Campaign Plan</span>
-                </>
-              )}
-              {currentView === 'chatbot' && (
-                <>
-                  <button onClick={() => onNavigate('results')} className="text-gray-400 hover:text-white transition-colors">
-                    Results
-                  </button>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                  <span className="text-white font-medium">Eleanor</span>
-                </>
-              )}
-            </div>
+            {breadcrumb && (
+              <>
+                <ChevronRight className="w-4 h-4 text-gray-500" />
+                <span className="text-white font-medium text-sm">{breadcrumb}</span>
+              </>
+            )}
           </div>
 
-          {/* Navigation & User Menu */}
-          <div className="flex items-center gap-3">
-            {currentView !== 'results' && currentView !== 'browse' && (
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-3">
+            {navItems.map(({ view, label, icon: Icon }) => (
               <button
-                onClick={() => onNavigate('browse')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
+                key={view}
+                onClick={() => onNavigate(view)}
+                className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
               >
-                <Building className="w-4 h-4" />
-                <span className="text-sm font-medium">Browse States</span>
+                <Icon className="w-4 h-4" />
+                <span className="text-sm font-medium">{label}</span>
               </button>
-            )}
-
-            {currentView !== 'uncontested' && (
-              <button
-                onClick={() => onNavigate('uncontested')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
-              >
-                <Flag className="w-4 h-4" />
-                <span className="text-sm font-medium">Run Unopposed</span>
-              </button>
-            )}
-
-            {currentView !== 'chatbot' && (
-              <button
-                onClick={() => onNavigate('chatbot')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">Ask Eleanor</span>
-              </button>
-            )}
-
+            ))}
             {user ? (
-              <UserMenu
-                user={user}
-                onSignOut={onSignOut}
-                onViewSaved={onViewSaved}
-              />
+              <UserMenu user={user} onSignOut={onSignOut} onViewSaved={onViewSaved} />
             ) : (
               <button
                 onClick={onShowLogin}
                 className="flex items-center gap-2 px-4 py-2 text-white font-medium border border-white/30 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors"
               >
                 <LogIn className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign In</span>
+                Sign In
               </button>
             )}
           </div>
+
+          {/* Mobile: sign-in + hamburger */}
+          <div className="flex md:hidden items-center gap-2">
+            {!user && (
+              <button
+                onClick={onShowLogin}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-medium border border-white/30 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </button>
+            )}
+            <button
+              onClick={() => setMobileMenuOpen(o => !o)}
+              className="p-2 text-gray-300 hover:text-white transition-colors"
+              aria-label="Open menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile dropdown */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-1" style={{ backgroundColor: '#1A1A1A' }}>
+          {navItems.map(({ view, label, icon: Icon }) => (
+            <button
+              key={view}
+              onClick={() => { onNavigate(view); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-sm font-medium"
+            >
+              <Icon className="w-5 h-5" />
+              {label}
+            </button>
+          ))}
+          {user && (
+            <>
+              <button
+                onClick={() => { onViewSaved(); setMobileMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-sm font-medium"
+              >
+                <Heart className="w-5 h-5" />
+                My Saved Offices
+              </button>
+              <button
+                onClick={() => { onSignOut(); setMobileMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-3 py-3 text-red-400 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors text-sm font-medium"
+              >
+                <LogOut className="w-5 h-5" />
+                Sign Out
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 };
@@ -704,12 +724,24 @@ function App() {
   const [uncontestedOffices, setUncontestedOffices] = useState([]);
   const [uncontestedLoading, setUncontestedLoading] = useState(false);
   const [uncontestedLoaded, setUncontestedLoaded] = useState(false);
-  const [uncontestedFilters, setUncontestedFilters] = useState({ level: 'all', state: '', searchTerm: '' });
+  const [uncontestedFilters, setUncontestedFilters] = useState(() => {
+    // Seed filters from URL params on first load (e.g. /uncontested?state=NC&level=local)
+    const p = new URLSearchParams(window.location.search);
+    return {
+      level: p.get('level') || 'all',
+      state: p.get('state') || '',
+      searchTerm: p.get('q') || '',
+    };
+  });
   const [expandedFiling, setExpandedFiling] = useState(new Set());
   const [openStatesRaces, setOpenStatesRaces] = useState([]);
   const [openStatesLoading, setOpenStatesLoading] = useState(false);
   const [communityRaces, setCommunityRaces] = useState([]);
+  const [communityRacesLoaded, setCommunityRacesLoaded] = useState(false);
+  const [uncontestedCount, setUncontestedCount] = useState(null);
+  const [sosDataFreshness, setSosDataFreshness] = useState(null); // ISO string of last import
   const [showSubmitRaceModal, setShowSubmitRaceModal] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
   // Fetch all offices with no candidates
   useEffect(() => {
@@ -730,9 +762,19 @@ function App() {
     }
   }, [currentView, uncontestedLoaded]);
 
-  // Fetch community-submitted races on first visit to uncontested view
+  // Fetch total uncontested count once for the landing page callout
+  useEffect(() => {
+    supabase
+      .from('offices')
+      .select('id', { count: 'exact', head: true })
+      .or('total_candidates.is.null,total_candidates.eq.0')
+      .then(({ count }) => { if (count !== null) setUncontestedCount(count); });
+  }, []);
+
+  // Fetch community-submitted races once (guard prevents re-fetch on view changes)
   useEffect(() => {
     if (currentView !== 'uncontested') return;
+    if (communityRacesLoaded) return;
     supabase
       .from('submitted_races')
       .select('*')
@@ -757,9 +799,37 @@ function App() {
             source_url: r.source_url || null,
             notes: r.notes || null,
           })));
+          setCommunityRacesLoaded(true);
         }
       });
-  }, [currentView]);
+  }, [currentView, communityRacesLoaded]);
+
+  // Fetch SoS data freshness when a state filter is selected on uncontested view
+  useEffect(() => {
+    if (!uncontestedFilters.state) { setSosDataFreshness(null); return; }
+    supabase
+      .from('sos_candidates')
+      .select('updated_at')
+      .eq('state', uncontestedFilters.state)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .single()
+      .then(({ data }) => setSosDataFreshness(data?.updated_at ?? null));
+  }, [uncontestedFilters.state]);
+
+  // Sync uncontested filters to URL query string
+  useEffect(() => {
+    if (currentView !== 'uncontested') return;
+    const p = new URLSearchParams();
+    if (uncontestedFilters.level !== 'all') p.set('level', uncontestedFilters.level);
+    if (uncontestedFilters.state) p.set('state', uncontestedFilters.state);
+    if (uncontestedFilters.searchTerm) p.set('q', uncontestedFilters.searchTerm);
+    const qs = p.toString();
+    const newUrl = `/uncontested${qs ? `?${qs}` : ''}`;
+    if (window.location.pathname + window.location.search !== newUrl) {
+      window.history.replaceState({ view: 'uncontested' }, '', newUrl);
+    }
+  }, [currentView, uncontestedFilters]);
 
   // Fetch OpenStates state legislature races when a state filter is selected
   useEffect(() => {
@@ -786,7 +856,7 @@ function App() {
 
   useEffect(() => {
     const loadStates = async () => {
-      const states = await simulatedBackend.getAllStates();
+      const states = await dataBackend.getAllStates();
       setAvailableStates(states);
     };
     loadStates();
@@ -816,9 +886,22 @@ useEffect(() => {
   }
 }, [selectedOffice, user, currentView, loadCampaignPlan]);
 
-// Scroll to top whenever view changes
+// Scroll to top and update page title whenever view changes
 useEffect(() => {
   window.scrollTo(0, 0);
+  const titles = {
+    landing:      'Decide to Run — Find Offices to Run For',
+    wizard:       'Find Your Offices | Decide to Run',
+    browse:       'Browse Offices by State | Decide to Run',
+    uncontested:  'Races with No Candidates | Decide to Run',
+    results:      'Available Offices | Decide to Run',
+    planToRun:    'Campaign Plan | Decide to Run',
+    chatbot:      'Ask Eleanor | Decide to Run',
+    terms:        'Terms of Service | Decide to Run',
+    privacy:      'Privacy Policy | Decide to Run',
+    accessibility:'Accessibility | Decide to Run',
+  };
+  document.title = titles[currentView] || 'Decide to Run';
 }, [currentView]);
 
   // Load saved offices when user changes
@@ -1028,7 +1111,7 @@ useEffect(() => {
 
           // Fall back to full state query if district lookup failed
           if (districtOffices.length === 0) {
-            districtOffices = await simulatedBackend.getOffices(userProfile.zipCode, userProfile.state);
+            districtOffices = await dataBackend.getOffices(userProfile.zipCode, userProfile.state);
           }
 
           // Enrich state legislature offices with real incumbent names from OpenStates
@@ -1037,7 +1120,7 @@ useEffect(() => {
             legislators
           );
 
-          const sosRecords = await simulatedBackend.getSosCandidates(userProfile.state);
+          const sosRecords = await dataBackend.getSosCandidates(userProfile.state);
           setLocalRacesMessage(message);
           setAvailableOffices(attachSosCandidates(allOffices, sosRecords));
           setBrowseMode(false);
@@ -1055,9 +1138,9 @@ useEffect(() => {
     setBrowseState(state);
     try {
       const [offices, statewideOffices, sosRecords] = await Promise.all([
-        simulatedBackend.getOfficesByState(state),
+        dataBackend.getOfficesByState(state),
         fetchStatewideRaces(state),
-        simulatedBackend.getSosCandidates(state),
+        dataBackend.getSosCandidates(state),
       ]);
       setAvailableOffices(attachSosCandidates([...statewideOffices, ...offices], sosRecords));
       setBrowseMode(true);
@@ -1258,15 +1341,13 @@ useEffect(() => {
                 <ArrowRight className="w-5 h-5" />
               </button>
 
-              <div className="text-center -mt-2">
-                <button
-                  onClick={() => setCurrentView('browse')}
-                  className="font-medium text-sm hover:underline"
-                  style={{ color: '#1A1A1A' }}
-                >
-                  Or browse offices by state →
-                </button>
-              </div>
+              <button
+                onClick={() => setCurrentView('browse')}
+                className="w-full py-3 px-6 rounded-xl font-semibold text-sm border-2 border-gray-200 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <Building className="w-4 h-4" />
+                Browse all offices by state
+              </button>
             </div>
 
             {/* OR pill */}
@@ -1386,7 +1467,9 @@ useEffect(() => {
                   <Flag className="w-4 h-4" style={{ color: '#D85A30' }} />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">Races with zero candidates</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {uncontestedCount !== null ? `${uncontestedCount.toLocaleString()} races` : 'Races'} with zero candidates
+                  </p>
                   <p className="text-xs text-gray-400">See every office where no one has filed yet</p>
                 </div>
               </div>
@@ -1457,7 +1540,7 @@ useEffect(() => {
                   disabled={!availableStates.includes(code) || loading}
                   className={`p-4 rounded-lg text-left transition-colors ${
                     availableStates.includes(code)
-                      ? 'bg-blue-50 hover:bg-blue-100 text-blue-900'
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                       : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                   }`}
                 >
@@ -1600,12 +1683,12 @@ useEffect(() => {
                 <span className="text-sm font-medium text-gray-500">
                   Step {wizardStep + 1} of {wizardSteps.length}
                 </span>
-                <Flag className="w-8 h-8 text-blue-600" />
+                <Flag className="w-8 h-8" style={{ color: '#D85A30' }} />
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((wizardStep + 1) / wizardSteps.length) * 100}%` }}
+                <div
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${((wizardStep + 1) / wizardSteps.length) * 100}%`, backgroundColor: '#D85A30' }}
                 />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">{currentStep.title}</h2>
@@ -1615,18 +1698,17 @@ useEffect(() => {
             <div className="mb-8">{currentStep.content}</div>
     
             <div className="flex gap-3">
-              {wizardStep > 0 && (
-                <button
-                  onClick={() => setWizardStep(wizardStep - 1)}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                >
-                  Back
-                </button>
-              )}
+              <button
+                onClick={() => wizardStep === 0 ? setCurrentView('landing') : setWizardStep(wizardStep - 1)}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                Back
+              </button>
               <button
                 onClick={handleWizardNext}
                 disabled={!canProceedWizard() || loading}
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                style={{ backgroundColor: '#1A1A1A' }}
               >
                 {loading ? 'Loading...' : wizardStep === wizardSteps.length - 1 ? 'See My Offices' : 'Continue'}
                 {!loading && <ChevronRight className="w-5 h-5" />}
@@ -1680,7 +1762,8 @@ useEffect(() => {
                 </div>
                 <button
                   onClick={() => setCurrentView('chatbot')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  className="text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+                  style={{ backgroundColor: '#1A1A1A' }}
                 >
                   <MessageCircle className="w-5 h-5" />
                   Ask Eleanor
@@ -1867,6 +1950,20 @@ useEffect(() => {
             </div>
 
             {/* Office Cards */}
+            {availableOffices.length === 0 && !loading && (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-sm mb-4">
+                <Flag className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-700 font-semibold mb-1">No offices found for your area.</p>
+                <p className="text-gray-400 text-sm mb-4">Try browsing by state to see what's available near you.</p>
+                <button
+                  onClick={() => setCurrentView('browse')}
+                  className="text-sm font-semibold text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#D85A30' }}
+                >
+                  Browse by State →
+                </button>
+              </div>
+            )}
             <div className="space-y-4">
               {filteredOffices.map((office) => {
                 const isComparing = compareOffices.find(o => o.id === office.id);
@@ -2128,7 +2225,7 @@ useEffect(() => {
 
 <button
   onClick={() => {
-    const plan = simulatedBackend.generatePlan(office);
+    const plan = dataBackend.generatePlan(office);
     setCurrentPlan(plan);
     setSelectedOffice(office);
     setCurrentView('planToRun');
@@ -2982,8 +3079,8 @@ if (currentView === 'uncontested') {
 
   const hasOpenStatesData = filteredOpenStates.length > 0;
 
-  // Unique states present in results for the state dropdown
-  const statesInResults = [...new Set(uncontestedOffices.map(o => o.state).filter(Boolean))].sort();
+  // All 50 states for the dropdown (not just states with SoS data)
+  const statesInResults = Object.keys(STATE_NAMES).sort();
 
   const toggleFiling = (id) => {
     setExpandedFiling(prev => {
@@ -3014,14 +3111,23 @@ if (currentView === 'uncontested') {
               </span>
               <h1 className="text-3xl font-bold text-gray-900">Races With No Candidates Yet</h1>
             </div>
-            <button
-              onClick={() => setShowSubmitRaceModal(true)}
-              className="shrink-0 flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#D85A30' }}
-            >
-              <Flag className="w-4 h-4" />
-              Submit a Race
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setShowAlertModal(true)}
+                className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors"
+              >
+                <Bell className="w-4 h-4" />
+                Get Alerts
+              </button>
+              <button
+                onClick={() => setShowSubmitRaceModal(true)}
+                className="flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#D85A30' }}
+              >
+                <Flag className="w-4 h-4" />
+                Submit a Race
+              </button>
+            </div>
           </div>
           <p className="text-gray-500 mb-6 max-w-2xl">
             These offices currently have zero filed candidates — meaning you could run unopposed.
@@ -3069,10 +3175,20 @@ if (currentView === 'uncontested') {
           </div>
 
           {!uncontestedLoading && (
-            <p className="text-sm text-gray-400 mt-3">
-              Showing <span className="font-semibold text-gray-700">{mergedUncontested.length}</span> of{' '}
-              <span className="font-semibold text-gray-700">{uncontestedOffices.length + openStatesRaces.length}</span> uncontested races
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-3">
+              <p className="text-sm text-gray-400">
+                Showing <span className="font-semibold text-gray-700">{mergedUncontested.length}</span> of{' '}
+                <span className="font-semibold text-gray-700">{uncontestedOffices.length + openStatesRaces.length}</span> uncontested races
+              </p>
+              {sosDataFreshness && uncontestedFilters.state && (
+                <p className="text-xs text-gray-400">
+                  SoS data as of{' '}
+                  <span className="font-medium text-gray-500">
+                    {new Date(sosDataFreshness).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                </p>
+              )}
+            </div>
           )}
         </div>
 
@@ -3114,7 +3230,7 @@ if (currentView === 'uncontested') {
           {mergedUncontested.map(office => {
             const isOpenStates = office.data_source === 'OpenStates';
             const isCommunity = office.data_source === 'community';
-            const { steps, links } = (isOpenStates || isCommunity) ? { steps: [], links: [] } : getFilingInfo(office);
+            const { steps, links } = getFilingInfo(office);
             const isExpanded = expandedFiling.has(office.id);
             const levelColor =
               office.level === 'federal'    ? 'bg-purple-100 text-purple-700' :
@@ -3183,25 +3299,14 @@ if (currentView === 'uncontested') {
 
                 {/* Filing plan / actions */}
                 <div className="flex flex-wrap items-center gap-4">
-                  {!isOpenStates && !isCommunity && (
-                    <button
-                      onClick={() => toggleFiling(office.id)}
-                      className="flex items-center gap-2 text-sm font-medium transition-colors"
-                      style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
-                    >
-                      <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                      {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
-                    </button>
-                  )}
-                  {(isOpenStates || isCommunity) && (
-                    <button
-                      onClick={() => { setSelectedOffice(office); setCurrentPlan(getCampaignPlanTemplate(office)); setCurrentView('planToRun'); }}
-                      className="text-sm font-medium transition-colors"
-                      style={{ color: '#D85A30' }}
-                    >
-                      Build Campaign Plan →
-                    </button>
-                  )}
+                  <button
+                    onClick={() => toggleFiling(office.id)}
+                    className="flex items-center gap-2 text-sm font-medium transition-colors"
+                    style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
+                  >
+                    <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
+                  </button>
                   {isCommunity && office.source_url && (
                     <a
                       href={office.source_url}
@@ -3212,10 +3317,33 @@ if (currentView === 'uncontested') {
                       Source →
                     </a>
                   )}
+                  {isCommunity && (
+                    <button
+                      onClick={async () => {
+                        const rawId = office.id.replace('community-', '');
+                        await fetch(
+                          `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/flag-submission`,
+                          {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+                            },
+                            body: JSON.stringify({ id: rawId }),
+                          }
+                        );
+                        alert('Thanks — this submission has been flagged for review.');
+                      }}
+                      className="text-xs text-gray-300 hover:text-red-400 transition-colors ml-auto"
+                      title="Report this submission"
+                    >
+                      Report
+                    </button>
+                  )}
                 </div>
 
                 {/* Expanded filing plan */}
-                {!isOpenStates && !isCommunity && isExpanded && (
+                {isExpanded && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="grid sm:grid-cols-2 gap-6">
                       {/* Steps */}
@@ -3287,11 +3415,150 @@ if (currentView === 'uncontested') {
       <SiteFooter onNavigate={setCurrentView} />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
       <SubmitRaceModal isOpen={showSubmitRaceModal} onClose={() => setShowSubmitRaceModal(false)} />
+      <RaceAlertModal
+        isOpen={showAlertModal}
+        onClose={() => setShowAlertModal(false)}
+        defaultState={uncontestedFilters.state}
+      />
     </div>
   );
 }
 
+  // Admin View
+  if (currentView === 'admin') {
+    return (
+      <AdminView
+        supabase={supabase}
+        onNavigate={setCurrentView}
+        user={user}
+        onShowLogin={() => setShowLoginModal(true)}
+      />
+    );
+  }
+
 return null;
 }
+
+// ── Admin View Component ──────────────────────────────────────────────────────
+const AdminView = ({ supabase, onNavigate, user, onShowLogin }) => {
+  const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL;
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  const isAdmin = user && ADMIN_EMAIL && user.email === ADMIN_EMAIL;
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('submitted_races')
+      .select('*')
+      .in('status', ['pending', 'flagged'])
+      .order('submitted_at', { ascending: false });
+    setSubmissions(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (isAdmin) load();
+  }, [isAdmin]); // eslint-disable-line
+
+  const updateStatus = async (id, status) => {
+    setActionLoading(id + status);
+    await supabase.from('submitted_races').update({ status }).eq('id', id);
+    setSubmissions(prev => prev.filter(s => s.id !== id));
+    setActionLoading(null);
+  };
+
+  if (!user) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <p className="text-gray-600 mb-4">Sign in to access the admin panel.</p>
+        <button onClick={onShowLogin} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1A1A1A' }}>Sign In</button>
+      </div>
+    </div>
+  );
+
+  if (!isAdmin) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <p className="text-gray-600 mb-4">You don't have access to this page.</p>
+        <button onClick={() => onNavigate('landing')} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1A1A1A' }}>Go Home</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div style={{ backgroundColor: '#1A1A1A' }} className="px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => onNavigate('landing')} className="text-gray-400 hover:text-white text-sm transition-colors">← Home</button>
+          <span className="text-white font-bold text-lg">Admin — Submissions Review</span>
+        </div>
+        <span className="text-gray-400 text-sm">{user.email}</span>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {loading ? (
+          <div className="text-center py-16 text-gray-500">
+            <div className="inline-block w-8 h-8 border-4 border-gray-200 border-t-gray-500 rounded-full animate-spin mb-3" />
+            <p>Loading submissions…</p>
+          </div>
+        ) : submissions.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+            <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-3" />
+            <p className="text-gray-700 font-semibold">All clear — no pending or flagged submissions.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {submissions.map(s => (
+              <div key={s.id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg">{s.office_title}</h3>
+                    <p className="text-sm text-gray-500">
+                      {s.level} · {s.state}{s.city ? ` · ${s.city}` : ''}{s.district ? ` · District ${s.district}` : ''}
+                    </p>
+                  </div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.status === 'flagged' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {s.status} {s.status === 'flagged' ? `(${s.reported_count} reports)` : ''}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm text-gray-600 mb-3">
+                  {s.filing_deadline && <div><span className="text-gray-400">Filing:</span> {s.filing_deadline}</div>}
+                  {s.next_election && <div><span className="text-gray-400">Election:</span> {s.next_election}</div>}
+                  {s.submitter_email && <div><span className="text-gray-400">Submitted by:</span> {s.submitter_email}</div>}
+                  {s.submitter_ip && <div><span className="text-gray-400">IP:</span> {s.submitter_ip}</div>}
+                  {s.source_url && <div className="col-span-2"><span className="text-gray-400">Source:</span> <a href={s.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{s.source_url}</a></div>}
+                  {s.notes && <div className="col-span-2"><span className="text-gray-400">Notes:</span> {s.notes}</div>}
+                  {s.review_note && <div className="col-span-3"><span className="text-gray-400">AI review:</span> {s.review_note}</div>}
+                </div>
+
+                <div className="flex gap-2 pt-3 border-t border-gray-100">
+                  <button
+                    onClick={() => updateStatus(s.id, 'published')}
+                    disabled={actionLoading === s.id + 'published'}
+                    className="flex-1 text-sm font-semibold text-white py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                    style={{ backgroundColor: '#D85A30' }}
+                  >
+                    Approve & Publish
+                  </button>
+                  <button
+                    onClick={() => updateStatus(s.id, 'removed')}
+                    disabled={actionLoading === s.id + 'removed'}
+                    className="flex-1 text-sm font-semibold text-gray-700 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default App;

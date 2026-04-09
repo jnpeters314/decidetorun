@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+const RATE_LIMIT = 10; // requests per IP per hour
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -189,6 +194,31 @@ serve(async (req) => {
     });
   }
 
+  // ── IP rate limiting (10 requests per IP per hour) ─────────────────────────
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+  const { count } = await supabase
+    .from("eleanor_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("ip", ip)
+    .gte("requested_at", oneHourAgo);
+
+  if ((count ?? 0) >= RATE_LIMIT) {
+    return new Response(
+      JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+      { status: 429, headers: CORS_HEADERS }
+    );
+  }
+
+  // Record this request (fire-and-forget; don't block the response)
+  supabase.from("eleanor_requests").insert({ ip }).then(() => {});
+
   try {
     const { messages } = await req.json();
 
@@ -200,7 +230,7 @@ serve(async (req) => {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         system: `${ELEANOR_SYSTEM_PROMPT}\n\nCURRENT DATE: ${new Date().toISOString().split("T")[0]}. Any election year before this date is in the past.`,
         messages,

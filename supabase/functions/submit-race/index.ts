@@ -204,7 +204,10 @@ serve(async (req) => {
       city: sanitize(city, 100),
       filing_deadline: filing_deadline || null,
       next_election: next_election || null,
-      source_url: source_url?.trim().slice(0, 500) || null,
+      source_url: (() => {
+        const u = source_url?.trim().slice(0, 500) || null;
+        return u && /^https?:\/\//i.test(u) ? u : null;
+      })(),
       notes: sanitize(notes, 500),
       submitter_email: submitter_email?.trim().slice(0, 200) || null,
       submitter_ip: ip,
