@@ -25,6 +25,7 @@ const EMPTY_FORM = {
   source_url: '',
   notes: '',
   submitter_email: '',
+  website: '', // honeypot — never shown to real users
 };
 
 export const SubmitRaceModal = ({ isOpen, onClose }) => {
@@ -90,7 +91,7 @@ export const SubmitRaceModal = ({ isOpen, onClose }) => {
             <CheckCircle className="w-14 h-14 mx-auto mb-4" style={{ color: '#D85A30' }} />
             <h3 className="text-xl font-bold text-gray-900 mb-2">Thanks for the tip!</h3>
             <p className="text-gray-500 mb-6 text-sm">
-              Your submission is now live on the platform with a "Community Submitted" badge.
+              Your submission was reviewed and added to the platform with a "Community Submitted" badge.
               Other users can use it to find this race and build a campaign plan.
             </p>
             <button
@@ -112,6 +113,18 @@ export const SubmitRaceModal = ({ isOpen, onClose }) => {
             <p className="text-sm text-gray-500 mb-6">
               Know about an office with no candidates? Add it so others can find it and consider running.
             </p>
+
+            {/* Hidden honeypot — real users never see this; bots fill it and get silently dropped */}
+            <input
+              type="text"
+              name="website"
+              value={form.website ?? ''}
+              onChange={e => set('website', e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              style={{ display: 'none' }}
+              aria-hidden="true"
+            />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Office name */}
@@ -267,7 +280,7 @@ export const SubmitRaceModal = ({ isOpen, onClose }) => {
               </button>
 
               <p className="text-xs text-gray-400 text-center">
-                Submissions appear immediately with a "Community Submitted" badge.
+                Submissions are reviewed instantly and published with a "Community Submitted" badge.
               </p>
             </form>
           </div>

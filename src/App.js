@@ -752,7 +752,7 @@ function App() {
             incumbent: null,
             total_candidates: 0,
             candidates_running: [],
-            confidence: 'community',
+            confidence: r.confidence || 'community',
             data_source: 'community',
             source_url: r.source_url || null,
             notes: r.notes || null,
@@ -3134,7 +3134,7 @@ if (currentView === 'uncontested') {
                       </span>
                       {isCommunity ? (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                          Community Submitted
+                          {office.confidence === 'community_reviewed' ? 'Community · AI Reviewed' : 'Community Submitted'}
                         </span>
                       ) : isOpenStates && !office.verified_uncontested ? (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
