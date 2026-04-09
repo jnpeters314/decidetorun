@@ -38,6 +38,19 @@ serve(async (req) => {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
+  // TODO: Real data sources not yet identified. Uncomment the block below once
+  // you have a working Socrata dataset ID from https://data.colorado.gov or a direct
+  // CSV URL from https://www.sos.state.co.us/pubs/elections/
+  return new Response(
+    JSON.stringify({
+      message: "Colorado importer not yet configured — data source pending",
+      hint: "Find a candidate filing dataset at https://data.colorado.gov or https://www.coloradosos.gov/pubs/elections/candidates/candidateInfo.html",
+      count: 0,
+    }),
+    { headers: CORS_HEADERS }
+  );
+
+  /* eslint-disable no-unreachable */
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   try {

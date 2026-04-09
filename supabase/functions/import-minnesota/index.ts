@@ -41,6 +41,19 @@ serve(async (req) => {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
+  // TODO: Real data sources not yet identified. Uncomment the block below once
+  // you have a working Socrata dataset ID from https://data.mn.gov or a direct
+  // CSV URL from https://www.sos.state.mn.us/elections-voting/
+  return new Response(
+    JSON.stringify({
+      message: "Minnesota importer not yet configured — data source pending",
+      hint: "Find a candidate filing dataset at https://data.mn.gov or https://www.sos.state.mn.us/elections-voting/",
+      count: 0,
+    }),
+    { headers: CORS_HEADERS }
+  );
+
+  /* eslint-disable no-unreachable */
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   try {
