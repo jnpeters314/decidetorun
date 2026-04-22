@@ -421,7 +421,7 @@ const CompareModal = ({ offices, onClose }) => {
               <button
                 onClick={onClose}
                 className="text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#1F1F1F' }}
+                style={{ backgroundColor: '#004AAD' }}
               >
                 Got It
               </button>
@@ -531,7 +531,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
   }[currentView];
 
   return (
-    <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#1F1F1F' }}>
+    <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#004AAD' }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Breadcrumb */}
@@ -600,7 +600,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
 
       {/* Mobile dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-1" style={{ backgroundColor: '#1F1F1F' }}>
+        <div className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-1" style={{ backgroundColor: '#004AAD' }}>
           {navItems.map(({ view, label, icon: Icon }) => (
             <button
               key={view}
@@ -1258,7 +1258,7 @@ useEffect(() => {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* Top nav bar */}
-        <div style={{ backgroundColor: '#1F1F1F' }}>
+        <div style={{ backgroundColor: '#004AAD' }}>
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <LogoMark size={32} />
@@ -1335,7 +1335,7 @@ useEffect(() => {
               <button
                 onClick={() => setCurrentView('wizard')}
                 className="w-full text-white py-4 px-6 rounded-xl font-bold text-base hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-auto"
-                style={{ backgroundColor: '#1F1F1F' }}
+                style={{ backgroundColor: '#004AAD' }}
               >
                 Search by Location
                 <ArrowRight className="w-5 h-5" />
@@ -1364,7 +1364,7 @@ useEffect(() => {
 
             {/* Right: Eleanor */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-              <div className="p-6" style={{ backgroundColor: '#1F1F1F' }}>
+              <div className="p-6" style={{ backgroundColor: '#004AAD' }}>
                 <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 text-white" style={{ backgroundColor: '#D83C13' }}>
                   I'm not sure where to start
                 </span>
@@ -1399,7 +1399,7 @@ useEffect(() => {
                   chatMessages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs rounded-xl px-4 py-2.5 text-sm ${msg.role === 'user' ? 'text-white' : 'bg-white border border-gray-200 text-gray-800 shadow-sm'}`}
-                        style={msg.role === 'user' ? { backgroundColor: '#1F1F1F' } : {}}>
+                        style={msg.role === 'user' ? { backgroundColor: '#004AAD' } : {}}>
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                       </div>
                     </div>
@@ -1441,7 +1441,7 @@ useEffect(() => {
                     }}
                     placeholder="Ask Eleanor a question..."
                     className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none text-sm bg-gray-50"
-                    style={{ '--tw-ring-color': '#1F1F1F' }}
+                    style={{ '--tw-ring-color': '#004AAD' }}
                     disabled={chatLoading}
                     maxLength={500}
                   />
@@ -1449,7 +1449,7 @@ useEffect(() => {
                     onClick={handleSendChatMessage}
                     disabled={chatLoading || !chatInput.trim()}
                     className="text-white px-4 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center"
-                    style={{ backgroundColor: '#1F1F1F' }}
+                    style={{ backgroundColor: '#004AAD' }}
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -1495,7 +1495,7 @@ useEffect(() => {
               <button
                 onClick={() => setShowSubmitRaceModal(true)}
                 className="flex-shrink-0 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#1F1F1F' }}
+                style={{ backgroundColor: '#004AAD' }}
               >
                 Submit a race →
               </button>
@@ -1708,7 +1708,7 @@ useEffect(() => {
                 onClick={handleWizardNext}
                 disabled={!canProceedWizard() || loading}
                 className="flex-1 text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ backgroundColor: '#1F1F1F' }}
+                style={{ backgroundColor: '#004AAD' }}
               >
                 {loading ? 'Loading...' : wizardStep === wizardSteps.length - 1 ? 'See My Offices' : 'Continue'}
                 {!loading && <ChevronRight className="w-5 h-5" />}
@@ -1763,7 +1763,7 @@ useEffect(() => {
                 <button
                   onClick={() => setCurrentView('chatbot')}
                   className="text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
-                  style={{ backgroundColor: '#1F1F1F' }}
+                  style={{ backgroundColor: '#004AAD' }}
                 >
                   <MessageCircle className="w-5 h-5" />
                   Ask Eleanor
@@ -1886,7 +1886,7 @@ useEffect(() => {
                         ? 'text-white border-transparent'
                         : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                     }`}
-                    style={filters.level === value ? { backgroundColor: '#1F1F1F', borderColor: '#1F1F1F' } : {}}
+                    style={filters.level === value ? { backgroundColor: '#004AAD', borderColor: '#004AAD' } : {}}
                   >
                     {label}
                   </button>
@@ -2752,7 +2752,7 @@ if (currentView === 'chatbot') {
 if (currentView === 'terms') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#1F1F1F' }}>
+      <div style={{ backgroundColor: '#004AAD' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
           <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
@@ -2833,7 +2833,7 @@ if (currentView === 'terms') {
 if (currentView === 'privacy') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#1F1F1F' }}>
+      <div style={{ backgroundColor: '#004AAD' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
           <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
@@ -2939,7 +2939,7 @@ if (currentView === 'privacy') {
 if (currentView === 'accessibility') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#1F1F1F' }}>
+      <div style={{ backgroundColor: '#004AAD' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
           <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
@@ -3149,7 +3149,7 @@ if (currentView === 'uncontested') {
                     ? 'text-white border-transparent'
                     : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                 }`}
-                style={uncontestedFilters.level === value ? { backgroundColor: '#1F1F1F', borderColor: '#1F1F1F' } : {}}
+                style={uncontestedFilters.level === value ? { backgroundColor: '#004AAD', borderColor: '#004AAD' } : {}}
               >
                 {label}
               </button>
@@ -3358,7 +3358,7 @@ if (currentView === 'uncontested') {
                         <ol className="space-y-2">
                           {steps.map((step, i) => (
                             <li key={i} className="flex gap-2 text-sm text-gray-600">
-                              <span className="flex-shrink-0 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white mt-0.5" style={{ backgroundColor: '#1F1F1F' }}>
+                              <span className="flex-shrink-0 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white mt-0.5" style={{ backgroundColor: '#004AAD' }}>
                                 {i + 1}
                               </span>
                               {step}
@@ -3477,7 +3477,7 @@ const AdminView = ({ supabase, onNavigate, user, onShowLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <p className="text-gray-600 mb-4">Sign in to access the admin panel.</p>
-        <button onClick={onShowLogin} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1F1F1F' }}>Sign In</button>
+        <button onClick={onShowLogin} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#004AAD' }}>Sign In</button>
       </div>
     </div>
   );
@@ -3486,14 +3486,14 @@ const AdminView = ({ supabase, onNavigate, user, onShowLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <p className="text-gray-600 mb-4">You don't have access to this page.</p>
-        <button onClick={() => onNavigate('landing')} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1F1F1F' }}>Go Home</button>
+        <button onClick={() => onNavigate('landing')} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#004AAD' }}>Go Home</button>
       </div>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div style={{ backgroundColor: '#1F1F1F' }} className="px-6 py-4 flex items-center justify-between">
+      <div style={{ backgroundColor: '#004AAD' }} className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => onNavigate('landing')} className="text-gray-400 hover:text-white text-sm transition-colors">← Home</button>
           <span className="text-white font-bold text-lg">Admin — Submissions Review</span>
