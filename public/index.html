@@ -81,6 +81,51 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
+    <!-- CrowdBlue network banner — static so it renders before React -->
+    <div id="cb-network-bar" style="
+      background: #ffffff;
+      border-bottom: 2px solid #1a4fc4;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 28px;
+      font-family: 'Libre Franklin', 'Franklin Gothic Medium', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      position: relative;
+      z-index: 9999;
+    ">
+      <!-- Brand wordmark -->
+      <a href="https://crowdblue.com/feed" style="
+        font-weight: 800;
+        color: #0d1b3e;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      ">CrowdBlue</a>
+
+      <!-- Product links -->
+      <a href="https://decidetorun.com/" style="
+        font-weight: 600;
+        color: #1a4fc4;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-bottom: 1.5px solid #1a4fc4;
+        padding-bottom: 1px;
+      ">Decide to Run</a>
+
+      <a href="https://campaigns.crowdblue.com/" style="
+        font-weight: 600;
+        color: #1a4fc4;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      " onmouseover="this.style.borderBottom='1.5px solid #1a4fc4'; this.style.paddingBottom='1px';"
+         onmouseout="this.style.borderBottom='none'; this.style.paddingBottom='0';">Campaign HQ</a>
+    </div>
+
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
   </body>
