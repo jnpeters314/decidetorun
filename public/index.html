@@ -3,10 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#1A1A1A" />
+    <meta name="theme-color" content="#1F1F1F" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&family=Barlow:wght@600&display=swap" rel="stylesheet" />
+    <!-- Barlow Condensed kept only for the Decide to Run logo wordmark -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&display=swap" rel="stylesheet" />
+    <!--
+      Proxima Nova is loaded via Adobe Fonts. Add your Typekit kit embed here if you have one:
+      <link rel="stylesheet" href="https://use.typekit.net/YOUR_KIT_ID.css" />
+      Until then, Helvetica / Arial provides a clean fallback.
+    -->
+    <style>
+      /* CrowdBlue design system — global typography & color base */
+      :root {
+        --white:       #FDFDFD;
+        --neutral-0:   #EBEBEB;
+        --neutral-1:   #DADADA;
+        --neutral-2:   #808080;
+        --black:       #1F1F1F;
+        --primary:     #004AAD;
+        --primary-1:   #ADC6E8;
+        --primary-2:   #5688CA;
+        --primary-3:   #012A60;
+        --secondary:   #D83C13;
+        --secondary-1: #F9CABD;
+        --secondary-2: #F17E5F;
+        --secondary-3: #4B1506;
+        --sans-font:   'proxima-nova', Helvetica, Arial, sans-serif;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      body {
+        font-family: var(--sans-font);
+        color: var(--black);
+        background-color: var(--white);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+    </style>
     <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
     <link rel="apple-touch-icon" sizes="192x192" href="%PUBLIC_URL%/logo192.png" />
@@ -84,7 +117,7 @@
     <!-- CrowdBlue network banner — static so it renders before React -->
     <div id="cb-network-bar" style="
       background: #ffffff;
-      border-bottom: 2px solid #1a4fc4;
+      border-bottom: 2px solid #004AAD;
       height: 40px;
       display: flex;
       align-items: center;
@@ -99,7 +132,7 @@
       <!-- Brand wordmark -->
       <a href="https://crowdblue.com/feed" style="
         font-weight: 800;
-        color: #0d1b3e;
+        color: #1F1F1F;
         text-decoration: none;
         text-transform: uppercase;
         letter-spacing: 0.1em;
@@ -108,21 +141,21 @@
       <!-- Product links -->
       <a href="https://decidetorun.com/" style="
         font-weight: 600;
-        color: #1a4fc4;
+        color: #004AAD;
         text-decoration: none;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        border-bottom: 1.5px solid #1a4fc4;
+        border-bottom: 1.5px solid #004AAD;
         padding-bottom: 1px;
       ">Decide to Run</a>
 
       <a href="https://campaigns.crowdblue.com/" style="
         font-weight: 600;
-        color: #1a4fc4;
+        color: #004AAD;
         text-decoration: none;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-      " onmouseover="this.style.borderBottom='1.5px solid #1a4fc4'; this.style.paddingBottom='1px';"
+      " onmouseover="this.style.borderBottom='1.5px solid #004AAD'; this.style.paddingBottom='1px';"
          onmouseout="this.style.borderBottom='none'; this.style.paddingBottom='0';">Campaign HQ</a>
     </div>
 

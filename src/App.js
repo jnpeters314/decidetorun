@@ -19,10 +19,10 @@ import { RaceAlertModal } from './components/RaceAlertModal';
 // Brand logo mark
 const LogoMark = ({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="24" cy="24" r="24" fill="#1A1A1A"/>
-    <polygon points="16,12 28,12 38,24 28,36 16,36 26,24" fill="#D85A30"/>
-    <rect x="11" y="21" width="7" height="2" rx="1" fill="#D85A30" opacity="0.5"/>
-    <rect x="11" y="25" width="5" height="2" rx="1" fill="#D85A30" opacity="0.3"/>
+    <circle cx="24" cy="24" r="24" fill="#1F1F1F"/>
+    <polygon points="16,12 28,12 38,24 28,36 16,36 26,24" fill="#D83C13"/>
+    <rect x="11" y="21" width="7" height="2" rx="1" fill="#D83C13" opacity="0.5"/>
+    <rect x="11" y="25" width="5" height="2" rx="1" fill="#D83C13" opacity="0.3"/>
   </svg>
 );
 
@@ -421,7 +421,7 @@ const CompareModal = ({ offices, onClose }) => {
               <button
                 onClick={onClose}
                 className="text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: '#1F1F1F' }}
               >
                 Got It
               </button>
@@ -492,7 +492,7 @@ const CompareModal = ({ offices, onClose }) => {
 };
 
 const SiteFooter = ({ onNavigate }) => (
-  <footer style={{ backgroundColor: '#1A1A1A' }} className="mt-auto">
+  <footer style={{ backgroundColor: '#1F1F1F' }} className="mt-auto">
     <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
       <span className="text-gray-300 text-sm">© {new Date().getFullYear()} Decide to Run. All rights reserved.</span>
       <div className="flex items-center gap-6">
@@ -531,7 +531,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
   }[currentView];
 
   return (
-    <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#1A1A1A' }}>
+    <header className="sticky top-0 z-40 shadow-md" style={{ backgroundColor: '#1F1F1F' }}>
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Breadcrumb */}
@@ -600,7 +600,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
 
       {/* Mobile dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-1" style={{ backgroundColor: '#1A1A1A' }}>
+        <div className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-1" style={{ backgroundColor: '#1F1F1F' }}>
           {navItems.map(({ view, label, icon: Icon }) => (
             <button
               key={view}
@@ -1258,7 +1258,7 @@ useEffect(() => {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* Top nav bar */}
-        <div style={{ backgroundColor: '#1A1A1A' }}>
+        <div style={{ backgroundColor: '#1F1F1F' }}>
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <LogoMark size={32} />
@@ -1280,8 +1280,8 @@ useEffect(() => {
 
         {/* Hero */}
         <div className="max-w-6xl mx-auto px-6 pt-14 pb-8 text-center">
-          <h1 className="text-5xl font-bold mb-4" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900, color: '#1A1A1A', letterSpacing: '0.01em' }}>
-            Decide to <span style={{ color: '#D85A30' }}>Run</span>
+          <h1 className="font-bold mb-4" style={{ fontFamily: "'proxima-nova', Helvetica, Arial, sans-serif", fontWeight: 800, color: '#1F1F1F', fontSize: '3rem', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
+            Decide to <span style={{ color: '#D83C13' }}>Run</span>
           </h1>
           <p className="text-lg text-gray-500 max-w-xl mx-auto">
             Discover offices you can run for and get everything you need to launch your campaign.
@@ -1302,10 +1302,10 @@ useEffect(() => {
             {/* Left: Find an Office */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col gap-6 h-full">
               <div>
-                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-4 text-white" style={{ backgroundColor: '#D85A30' }}>
+                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-4 text-white" style={{ backgroundColor: '#D83C13' }}>
                   I know what I want
                 </span>
-                <h2 className="text-2xl font-bold mb-3" style={{ color: '#1A1A1A' }}>Find an Office to Run For</h2>
+                <h2 className="text-2xl font-bold mb-3" style={{ color: '#1F1F1F' }}>Find an Office to Run For</h2>
                 <p className="text-gray-500 text-sm leading-relaxed">
                   Search by your zip code or city to see every elected position available near you — with filing deadlines, eligibility requirements, estimated costs, and a personalized campaign plan.
                 </p>
@@ -1313,20 +1313,20 @@ useEffect(() => {
 
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
-                    <MapPin className="w-4 h-4" style={{ color: '#D85A30' }} />
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#F9CABD' }}>
+                    <MapPin className="w-4 h-4" style={{ color: '#D83C13' }} />
                   </span>
                   Search by zip code to find offices near you
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
-                    <Calendar className="w-4 h-4" style={{ color: '#D85A30' }} />
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#F9CABD' }}>
+                    <Calendar className="w-4 h-4" style={{ color: '#D83C13' }} />
                   </span>
                   See filing deadlines and eligibility requirements
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
-                    <TrendingUp className="w-4 h-4" style={{ color: '#D85A30' }} />
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#F9CABD' }}>
+                    <TrendingUp className="w-4 h-4" style={{ color: '#D83C13' }} />
                   </span>
                   Get a personalized campaign plan
                 </div>
@@ -1335,7 +1335,7 @@ useEffect(() => {
               <button
                 onClick={() => setCurrentView('wizard')}
                 className="w-full text-white py-4 px-6 rounded-xl font-bold text-base hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-auto"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: '#1F1F1F' }}
               >
                 Search by Location
                 <ArrowRight className="w-5 h-5" />
@@ -1364,8 +1364,8 @@ useEffect(() => {
 
             {/* Right: Eleanor */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-              <div className="p-6" style={{ backgroundColor: '#1A1A1A' }}>
-                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 text-white" style={{ backgroundColor: '#D85A30' }}>
+              <div className="p-6" style={{ backgroundColor: '#1F1F1F' }}>
+                <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 text-white" style={{ backgroundColor: '#D83C13' }}>
                   I'm not sure where to start
                 </span>
                 <div className="flex items-start gap-3 text-white">
@@ -1399,7 +1399,7 @@ useEffect(() => {
                   chatMessages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs rounded-xl px-4 py-2.5 text-sm ${msg.role === 'user' ? 'text-white' : 'bg-white border border-gray-200 text-gray-800 shadow-sm'}`}
-                        style={msg.role === 'user' ? { backgroundColor: '#1A1A1A' } : {}}>
+                        style={msg.role === 'user' ? { backgroundColor: '#1F1F1F' } : {}}>
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                       </div>
                     </div>
@@ -1441,7 +1441,7 @@ useEffect(() => {
                     }}
                     placeholder="Ask Eleanor a question..."
                     className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none text-sm bg-gray-50"
-                    style={{ '--tw-ring-color': '#1A1A1A' }}
+                    style={{ '--tw-ring-color': '#1F1F1F' }}
                     disabled={chatLoading}
                     maxLength={500}
                   />
@@ -1449,7 +1449,7 @@ useEffect(() => {
                     onClick={handleSendChatMessage}
                     disabled={chatLoading || !chatInput.trim()}
                     className="text-white px-4 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center"
-                    style={{ backgroundColor: '#1A1A1A' }}
+                    style={{ backgroundColor: '#1F1F1F' }}
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -1463,8 +1463,8 @@ useEffect(() => {
           <div className="mt-8 max-w-xl mx-auto space-y-3">
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#fbe8e0' }}>
-                  <Flag className="w-4 h-4" style={{ color: '#D85A30' }} />
+                <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F9CABD' }}>
+                  <Flag className="w-4 h-4" style={{ color: '#D83C13' }} />
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
@@ -1476,7 +1476,7 @@ useEffect(() => {
               <button
                 onClick={() => setCurrentView('uncontested')}
                 className="flex-shrink-0 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#D85A30' }}
+                style={{ backgroundColor: '#D83C13' }}
               >
                 View races →
               </button>
@@ -1495,7 +1495,7 @@ useEffect(() => {
               <button
                 onClick={() => setShowSubmitRaceModal(true)}
                 className="flex-shrink-0 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: '#1F1F1F' }}
               >
                 Submit a race →
               </button>
@@ -1580,7 +1580,7 @@ useEffect(() => {
                 type="text"
                 value={userProfile.zipCode}
                 onChange={(e) => setUserProfile({...userProfile, zipCode: e.target.value.replace(/\D/g, '').slice(0, 5)})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004AAD] focus:border-transparent"
                 placeholder="12345"
                 maxLength={5}
               />
@@ -1591,7 +1591,7 @@ useEffect(() => {
     type="text"
     value={userProfile.city}
     onChange={(e) => setUserProfile({...userProfile, city: e.target.value})}
-    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004AAD]"
     placeholder="San Jose"
   />
 </div>
@@ -1600,7 +1600,7 @@ useEffect(() => {
               <select
                 value={userProfile.state}
                 onChange={(e) => setUserProfile({...userProfile, state: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004AAD] focus:border-transparent"
               >
                 <option value="">Select a state</option>
                 {Object.entries(STATE_NAMES).map(([code, name]) => (
@@ -1622,7 +1622,7 @@ useEffect(() => {
                 type="number"
                 value={userProfile.age}
                 onChange={(e) => setUserProfile({...userProfile, age: parseInt(e.target.value) || ''})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004AAD] focus:border-transparent"
                 placeholder="18"
                 min="18"
               />
@@ -1633,7 +1633,7 @@ useEffect(() => {
                   type="checkbox"
                   checked={userProfile.citizenship}
                   onChange={(e) => setUserProfile({...userProfile, citizenship: e.target.checked})}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-[#004AAD]"
                 />
                 <span className="text-sm text-gray-700">I am a U.S. citizen</span>
               </label>
@@ -1642,7 +1642,7 @@ useEffect(() => {
                   type="checkbox"
                   checked={userProfile.residency}
                   onChange={(e) => setUserProfile({...userProfile, residency: e.target.checked})}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-[#004AAD]"
                 />
                 <span className="text-sm text-gray-700">I live in the area where I want to run</span>
               </label>
@@ -1683,12 +1683,12 @@ useEffect(() => {
                 <span className="text-sm font-medium text-gray-500">
                   Step {wizardStep + 1} of {wizardSteps.length}
                 </span>
-                <Flag className="w-8 h-8" style={{ color: '#D85A30' }} />
+                <Flag className="w-8 h-8" style={{ color: '#D83C13' }} />
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
                 <div
                   className="h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((wizardStep + 1) / wizardSteps.length) * 100}%`, backgroundColor: '#D85A30' }}
+                  style={{ width: `${((wizardStep + 1) / wizardSteps.length) * 100}%`, backgroundColor: '#D83C13' }}
                 />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">{currentStep.title}</h2>
@@ -1708,7 +1708,7 @@ useEffect(() => {
                 onClick={handleWizardNext}
                 disabled={!canProceedWizard() || loading}
                 className="flex-1 text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: '#1F1F1F' }}
               >
                 {loading ? 'Loading...' : wizardStep === wizardSteps.length - 1 ? 'See My Offices' : 'Continue'}
                 {!loading && <ChevronRight className="w-5 h-5" />}
@@ -1763,7 +1763,7 @@ useEffect(() => {
                 <button
                   onClick={() => setCurrentView('chatbot')}
                   className="text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
-                  style={{ backgroundColor: '#1A1A1A' }}
+                  style={{ backgroundColor: '#1F1F1F' }}
                 >
                   <MessageCircle className="w-5 h-5" />
                   Ask Eleanor
@@ -1886,7 +1886,7 @@ useEffect(() => {
                         ? 'text-white border-transparent'
                         : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                     }`}
-                    style={filters.level === value ? { backgroundColor: '#1A1A1A', borderColor: '#1A1A1A' } : {}}
+                    style={filters.level === value ? { backgroundColor: '#1F1F1F', borderColor: '#1F1F1F' } : {}}
                   >
                     {label}
                   </button>
@@ -1900,13 +1900,13 @@ useEffect(() => {
                   placeholder="Search districts, names..."
                   value={filters.searchTerm}
                   onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004AAD] focus:border-transparent"
                 />
                 
                 <select
                   value={filters.sortBy}
                   onChange={(e) => setFilters({...filters, sortBy: e.target.value})}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004AAD] focus:border-transparent"
                 >
                   <option value="district">Sort by District</option>
                   <option value="deadline">Sort by Deadline</option>
@@ -1958,7 +1958,7 @@ useEffect(() => {
                 <button
                   onClick={() => setCurrentView('browse')}
                   className="text-sm font-semibold text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#D85A30' }}
+                  style={{ backgroundColor: '#D83C13' }}
                 >
                   Browse by State →
                 </button>
@@ -2231,7 +2231,8 @@ useEffect(() => {
     setCurrentView('planToRun');
     window.scrollTo(0, 0); // Scroll to top
   }}
-  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+  className="w-full text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity"
+  style={{ backgroundColor: '#004AAD' }}
 >
   View Campaign Plan
 </button>
@@ -2412,7 +2413,7 @@ if (currentView === 'planToRun' && currentPlan) {
 
   const sections = [
     { key: 'preFilingEssentials', title: 'Pre-Filing Essentials', icon: AlertCircle, colorClass: 'text-red-600', bgClass: 'bg-red-600' },
-    { key: 'filing', title: 'Filing Requirements', icon: Flag, colorClass: 'text-blue-600', bgClass: 'bg-blue-600' },
+    { key: 'filing', title: 'Filing Requirements', icon: Flag, colorClass: 'text-[#004AAD]', bgClass: 'bg-[#004AAD]' },
     { key: 'first30Days', title: 'First 30 Days', icon: Calendar, colorClass: 'text-purple-600', bgClass: 'bg-purple-600' },
     { key: 'fundraising', title: 'Fundraising Checklist', icon: DollarSign, colorClass: 'text-green-600', bgClass: 'bg-green-600' },
     { key: 'team', title: 'Team to Build', icon: Users, colorClass: 'text-indigo-600', bgClass: 'bg-indigo-600' },
@@ -2471,8 +2472,8 @@ if (currentView === 'planToRun' && currentPlan) {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div 
-                className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${completionPercentage}%` }}
+                className="h-3 rounded-full transition-all duration-300"
+                style={{ width: `${completionPercentage}%`, backgroundColor: '#004AAD' }}
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -2569,7 +2570,7 @@ if (currentView === 'planToRun' && currentPlan) {
                             type="checkbox"
                             checked={checkboxStates[item.id] || false}
                             onChange={() => handleCheckboxToggle(item.id)}
-                            className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-[#004AAD]"
                           />
                           <div className="flex-1">
                             <p className={`text-gray-900 ${checkboxStates[item.id] ? 'line-through text-gray-500' : ''}`}>
@@ -2620,7 +2621,8 @@ if (currentView === 'planToRun' && currentPlan) {
             <div className="flex gap-3">
               <button
                 onClick={() => setCurrentView('chatbot')}
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                style={{ backgroundColor: '#004AAD' }}
               >
                 <MessageCircle className="w-5 h-5" />
                 Ask Questions
@@ -2691,7 +2693,7 @@ if (currentView === 'chatbot') {
             ) : (
               chatMessages.map((msg, idx) => (
                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-3xl ${msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg p-4`}>
+                  <div className={`max-w-3xl ${msg.role === 'user' ? 'text-white' : 'bg-gray-100 text-gray-900'} rounded-lg p-4`} style={msg.role === 'user' ? { backgroundColor: '#004AAD' } : {}}>
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                     {msg.confidence && (
                       <div className="mt-2">
@@ -2723,13 +2725,14 @@ if (currentView === 'chatbot') {
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
                 placeholder="Ask a question..."
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004AAD] focus:border-transparent"
                 disabled={chatLoading}
               />
               <button
                 onClick={handleSendChatMessage}
                 disabled={chatLoading || !chatInput.trim()}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                style={{ backgroundColor: '#004AAD' }}
               >
                 <Send className="w-5 h-5" />
               </button>
@@ -2749,7 +2752,7 @@ if (currentView === 'chatbot') {
 if (currentView === 'terms') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#1A1A1A' }}>
+      <div style={{ backgroundColor: '#1F1F1F' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
           <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
@@ -2830,7 +2833,7 @@ if (currentView === 'terms') {
 if (currentView === 'privacy') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#1A1A1A' }}>
+      <div style={{ backgroundColor: '#1F1F1F' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
           <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
@@ -2936,7 +2939,7 @@ if (currentView === 'privacy') {
 if (currentView === 'accessibility') {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div style={{ backgroundColor: '#1A1A1A' }}>
+      <div style={{ backgroundColor: '#1F1F1F' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
           <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
@@ -3106,8 +3109,8 @@ if (currentView === 'uncontested') {
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           <div className="flex items-start justify-between gap-4 mb-2">
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full shrink-0" style={{ backgroundColor: '#fbe8e0' }}>
-                <Flag className="w-5 h-5" style={{ color: '#D85A30' }} />
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full shrink-0" style={{ backgroundColor: '#F9CABD' }}>
+                <Flag className="w-5 h-5" style={{ color: '#D83C13' }} />
               </span>
               <h1 className="text-3xl font-bold text-gray-900">Races With No Candidates Yet</h1>
             </div>
@@ -3122,7 +3125,7 @@ if (currentView === 'uncontested') {
               <button
                 onClick={() => setShowSubmitRaceModal(true)}
                 className="flex items-center gap-2 text-sm font-semibold text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#D85A30' }}
+                style={{ backgroundColor: '#D83C13' }}
               >
                 <Flag className="w-4 h-4" />
                 Submit a Race
@@ -3146,7 +3149,7 @@ if (currentView === 'uncontested') {
                     ? 'text-white border-transparent'
                     : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                 }`}
-                style={uncontestedFilters.level === value ? { backgroundColor: '#1A1A1A', borderColor: '#1A1A1A' } : {}}
+                style={uncontestedFilters.level === value ? { backgroundColor: '#1F1F1F', borderColor: '#1F1F1F' } : {}}
               >
                 {label}
               </button>
@@ -3302,7 +3305,7 @@ if (currentView === 'uncontested') {
                   <button
                     onClick={() => toggleFiling(office.id)}
                     className="flex items-center gap-2 text-sm font-medium transition-colors"
-                    style={{ color: isExpanded ? '#1A1A1A' : '#D85A30' }}
+                    style={{ color: isExpanded ? '#1F1F1F' : '#D83C13' }}
                   >
                     <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                     {isExpanded ? 'Hide filing plan' : 'How to run for this office'}
@@ -3355,7 +3358,7 @@ if (currentView === 'uncontested') {
                         <ol className="space-y-2">
                           {steps.map((step, i) => (
                             <li key={i} className="flex gap-2 text-sm text-gray-600">
-                              <span className="flex-shrink-0 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white mt-0.5" style={{ backgroundColor: '#1A1A1A' }}>
+                              <span className="flex-shrink-0 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white mt-0.5" style={{ backgroundColor: '#1F1F1F' }}>
                                 {i + 1}
                               </span>
                               {step}
@@ -3391,7 +3394,7 @@ if (currentView === 'uncontested') {
                         <button
                           onClick={() => { setSelectedOffice(office); setCurrentPlan(getCampaignPlanTemplate(office)); setCurrentView('planToRun'); }}
                           className="mt-3 w-full text-sm font-medium text-white py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity"
-                          style={{ backgroundColor: '#D85A30' }}
+                          style={{ backgroundColor: '#D83C13' }}
                         >
                           Build Full Campaign Plan →
                         </button>
@@ -3474,7 +3477,7 @@ const AdminView = ({ supabase, onNavigate, user, onShowLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <p className="text-gray-600 mb-4">Sign in to access the admin panel.</p>
-        <button onClick={onShowLogin} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1A1A1A' }}>Sign In</button>
+        <button onClick={onShowLogin} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1F1F1F' }}>Sign In</button>
       </div>
     </div>
   );
@@ -3483,14 +3486,14 @@ const AdminView = ({ supabase, onNavigate, user, onShowLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <p className="text-gray-600 mb-4">You don't have access to this page.</p>
-        <button onClick={() => onNavigate('landing')} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1A1A1A' }}>Go Home</button>
+        <button onClick={() => onNavigate('landing')} className="text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90" style={{ backgroundColor: '#1F1F1F' }}>Go Home</button>
       </div>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div style={{ backgroundColor: '#1A1A1A' }} className="px-6 py-4 flex items-center justify-between">
+      <div style={{ backgroundColor: '#1F1F1F' }} className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => onNavigate('landing')} className="text-gray-400 hover:text-white text-sm transition-colors">← Home</button>
           <span className="text-white font-bold text-lg">Admin — Submissions Review</span>
@@ -3540,7 +3543,7 @@ const AdminView = ({ supabase, onNavigate, user, onShowLogin }) => {
                     onClick={() => updateStatus(s.id, 'published')}
                     disabled={actionLoading === s.id + 'published'}
                     className="flex-1 text-sm font-semibold text-white py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-                    style={{ backgroundColor: '#D85A30' }}
+                    style={{ backgroundColor: '#D83C13' }}
                   >
                     Approve & Publish
                   </button>

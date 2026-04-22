@@ -67,7 +67,7 @@ export const RaceAlertModal = ({ isOpen, onClose, defaultState = '' }) => {
 
         {done ? (
           <div className="p-8 text-center">
-            <CheckCircle className="w-14 h-14 mx-auto mb-4" style={{ color: '#D85A30' }} />
+            <CheckCircle className="w-14 h-14 mx-auto mb-4" style={{ color: '#D83C13' }} />
             <h3 className="text-xl font-bold text-gray-900 mb-2">You're in!</h3>
             <p className="text-gray-500 text-sm mb-6">
               We'll email you when new uncontested races are added
@@ -76,7 +76,7 @@ export const RaceAlertModal = ({ isOpen, onClose, defaultState = '' }) => {
             <button
               onClick={handleClose}
               className="text-sm font-semibold text-white px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#D85A30' }}
+              style={{ backgroundColor: '#D83C13' }}
             >
               Done
             </button>
@@ -84,8 +84,8 @@ export const RaceAlertModal = ({ isOpen, onClose, defaultState = '' }) => {
         ) : (
           <div className="p-8">
             <div className="flex items-center gap-3 mb-1">
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full" style={{ backgroundColor: '#fbe8e0' }}>
-                <Bell className="w-4 h-4" style={{ color: '#D85A30' }} />
+              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full" style={{ backgroundColor: '#F9CABD' }}>
+                <Bell className="w-4 h-4" style={{ color: '#D83C13' }} />
               </span>
               <h2 className="text-xl font-bold text-gray-900">Get Race Alerts</h2>
             </div>
@@ -149,7 +149,7 @@ export const RaceAlertModal = ({ isOpen, onClose, defaultState = '' }) => {
                 type="submit"
                 disabled={loading}
                 className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-                style={{ backgroundColor: '#D85A30' }}
+                style={{ backgroundColor: '#D83C13' }}
               >
                 {loading ? 'Subscribing…' : 'Notify Me'}
               </button>

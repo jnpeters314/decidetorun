@@ -64,7 +64,8 @@ export const LoginModal = ({ isOpen, onClose, onSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="w-full text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                style={{ backgroundColor: '#004AAD' }}
               >
                 {loading ? 'Sending...' : 'Send Magic Link'}
               </button>
