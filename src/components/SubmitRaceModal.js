@@ -88,7 +88,7 @@ export const SubmitRaceModal = ({ isOpen, onClose }) => {
 
         {submitted ? (
           <div className="p-8 text-center">
-            <CheckCircle className="w-14 h-14 mx-auto mb-4" style={{ color: '#D83C13' }} />
+            <CheckCircle className="w-14 h-14 mx-auto mb-4" style={{ color: 'var(--secondary)' }} />
             <h3 className="text-xl font-bold text-gray-900 mb-2">Thanks for the tip!</h3>
             <p className="text-gray-500 mb-6 text-sm">
               Your submission was reviewed and added to the platform with a "Community Submitted" badge.
@@ -97,7 +97,7 @@ export const SubmitRaceModal = ({ isOpen, onClose }) => {
             <button
               onClick={handleClose}
               className="text-sm font-semibold text-white px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#D83C13' }}
+              style={{ backgroundColor: 'var(--secondary)' }}
             >
               Done
             </button>
@@ -105,8 +105,8 @@ export const SubmitRaceModal = ({ isOpen, onClose }) => {
         ) : (
           <div className="p-8">
             <div className="flex items-center gap-3 mb-1">
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full" style={{ backgroundColor: '#F9CABD' }}>
-                <Flag className="w-4 h-4" style={{ color: '#D83C13' }} />
+              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full" style={{ backgroundColor: 'var(--secondary-1)' }}>
+                <Flag className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
               </span>
               <h2 className="text-xl font-bold text-gray-900">Submit a Race</h2>
             </div>
@@ -274,7 +274,7 @@ export const SubmitRaceModal = ({ isOpen, onClose }) => {
                 type="submit"
                 disabled={loading}
                 className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-                style={{ backgroundColor: '#D83C13' }}
+                style={{ backgroundColor: 'var(--secondary)' }}
               >
                 {loading ? 'Submitting…' : 'Submit Race'}
               </button>
