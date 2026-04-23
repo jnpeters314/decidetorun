@@ -1,17 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
   <!--
-    Decide to Run — DTR Brand Mark (White on Transparent)
-    Use on blue or dark backgrounds.
-    Complements the CrowdBlue "C" mark.
+    Decide to Run — Brand Mark (White on transparent)
+    Clean white rounded square — use on blue or dark backgrounds.
   -->
-  <!-- DTR monogram — bold, centered, blue -->
-  <text
-    x="60" y="80"
-    font-family="proxima-nova, 'Helvetica Neue', Helvetica, Arial, sans-serif"
-    font-weight="700"
-    font-size="46"
-    letter-spacing="2"
-    fill="#FDFDFD"
-    text-anchor="middle"
-  >DTR</text>
+  <rect width="120" height="120" rx="20" fill="#FDFDFD"/>
 </svg>

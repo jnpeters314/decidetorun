@@ -16,21 +16,31 @@ import { RaceAlertModal } from './components/RaceAlertModal';
   import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng, fetchDistrictRaces } from './utils/ballotpedia';
   import { getLegislatorsForLocation, enrichOfficesWithIncumbents } from './utils/openstates';
 
-// Brand logo mark — DTR monogram, matches CrowdBlue favicon format
+// Brand logo mark — clean blue rounded square, no text
 const LogoMark = ({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100" height="100" rx="16" fill="#004AAD"/>
-    <text
-      x="50" y="67"
-      fontFamily="proxima-nova, 'Helvetica Neue', Helvetica, Arial, sans-serif"
-      fontWeight="700"
-      fontSize="38"
-      letterSpacing="1"
-      fill="#FDFDFD"
-      textAnchor="middle"
-    >DTR</text>
+    <rect width="100" height="100" rx="20" fill="#004AAD"/>
   </svg>
 );
+
+// Wordmark — "DECIDE" bold, "TO" light, "RUN" bold; tight tracking, all caps
+// Mirrors CrowdBlue's two-weight treatment
+const Wordmark = ({ color = '#FDFDFD', size = '1rem' }) => {
+  const base = {
+    fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif",
+    fontSize: size,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    lineHeight: 1,
+  };
+  return (
+    <span style={base}>
+      <span style={{ ...base, fontWeight: 700, color }}>Decide</span>
+      <span style={{ ...base, fontWeight: 300, color, opacity: 0.85 }}> to </span>
+      <span style={{ ...base, fontWeight: 700, color }}>Run</span>
+    </span>
+  );
+};
 
 // State names mapping
 const STATE_NAMES = {
@@ -547,7 +557,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <LogoMark size={28} />
-              <span className="font-bold text-lg text-white hidden sm:inline" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
+              <span className="hidden sm:inline"><Wordmark size="1rem" /></span>
             </button>
             {breadcrumb && (
               <>
@@ -1268,7 +1278,7 @@ useEffect(() => {
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <LogoMark size={32} />
-              <span className="font-bold text-xl text-white" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
+              <Wordmark size="1.1rem" />
             </div>
             {user ? (
               <UserMenu user={user} onSignOut={signOut} onViewSaved={handleViewSavedOffices} />
@@ -2761,7 +2771,7 @@ if (currentView === 'terms') {
       <div style={{ backgroundColor: 'var(--primary)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
+          <Wordmark size="1rem" />
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
@@ -2842,7 +2852,7 @@ if (currentView === 'privacy') {
       <div style={{ backgroundColor: 'var(--primary)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
+          <Wordmark size="1rem" />
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
@@ -2948,7 +2958,7 @@ if (currentView === 'accessibility') {
       <div style={{ backgroundColor: 'var(--primary)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
+          <Wordmark size="1rem" />
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
