@@ -1296,8 +1296,8 @@ useEffect(() => {
 
         {/* Hero */}
         <div className="max-w-6xl mx-auto px-6 pt-14 pb-8 text-center">
-          <h1 className="font-bold mb-4" style={{ fontFamily: "'proxima-nova', Helvetica, Arial, sans-serif", fontWeight: 800, color: 'var(--black)', fontSize: '3rem', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
-            Decide to <span style={{ color: 'var(--secondary)' }}>Run</span>
+          <h1 className="mb-4" style={{ lineHeight: 1.05 }}>
+            <Wordmark color="var(--black)" size="3.5rem" />
           </h1>
           <p className="text-lg text-gray-500 max-w-xl mx-auto">
             Discover offices you can run for and get everything you need to launch your campaign.
