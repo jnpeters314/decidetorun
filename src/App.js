@@ -502,12 +502,12 @@ const SiteFooter = ({ onNavigate }) => (
     <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
       <span className="text-gray-300 text-sm">© {new Date().getFullYear()} Decide to Run. All rights reserved.</span>
       <div className="flex items-center gap-6">
-        <button onClick={() => onNavigate('terms')} className="text-gray-300 hover:text-white text-sm transition-colors">
+        <a href="https://crowdblue.com/about/terms" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white text-sm transition-colors">
           Terms of Service
-        </button>
-        <button onClick={() => onNavigate('privacy')} className="text-gray-300 hover:text-white text-sm transition-colors">
+        </a>
+        <a href="https://crowdblue.com/about/privacy" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white text-sm transition-colors">
           Privacy Policy
-        </button>
+        </a>
         <button onClick={() => onNavigate('accessibility')} className="text-gray-300 hover:text-white text-sm transition-colors">
           Accessibility
         </button>
