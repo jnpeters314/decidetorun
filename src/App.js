@@ -16,13 +16,19 @@ import { RaceAlertModal } from './components/RaceAlertModal';
   import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng, fetchDistrictRaces } from './utils/ballotpedia';
   import { getLegislatorsForLocation, enrichOfficesWithIncumbents } from './utils/openstates';
 
-// Brand logo mark
-const LogoMark = ({ size = 28 }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="24" cy="24" r="24" fill="var(--black)"/>
-    <polygon points="16,12 28,12 38,24 28,36 16,36 26,24" fill="var(--secondary)"/>
-    <rect x="11" y="21" width="7" height="2" rx="1" fill="var(--secondary)" opacity="0.5"/>
-    <rect x="11" y="25" width="5" height="2" rx="1" fill="var(--secondary)" opacity="0.3"/>
+// Brand logo mark — DTR monogram, matches CrowdBlue favicon format
+const LogoMark = ({ size = 32 }) => (
+  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" rx="16" fill="#004AAD"/>
+    <text
+      x="50" y="67"
+      fontFamily="proxima-nova, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+      fontWeight="700"
+      fontSize="38"
+      letterSpacing="1"
+      fill="#FDFDFD"
+      textAnchor="middle"
+    >DTR</text>
   </svg>
 );
 
@@ -541,7 +547,7 @@ const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onSh
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <LogoMark size={28} />
-              <span className="font-bold text-lg text-white hidden sm:inline" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900, letterSpacing: '0.02em' }}>Decide to Run</span>
+              <span className="font-bold text-lg text-white hidden sm:inline" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
             </button>
             {breadcrumb && (
               <>
@@ -1262,7 +1268,7 @@ useEffect(() => {
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <LogoMark size={32} />
-              <span className="font-bold text-xl text-white" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900, letterSpacing: '0.02em' }}>Decide to Run</span>
+              <span className="font-bold text-xl text-white" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
             </div>
             {user ? (
               <UserMenu user={user} onSignOut={signOut} onViewSaved={handleViewSavedOffices} />
@@ -2755,7 +2761,7 @@ if (currentView === 'terms') {
       <div style={{ backgroundColor: 'var(--primary)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
+          <span className="font-bold text-white text-lg" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
@@ -2836,7 +2842,7 @@ if (currentView === 'privacy') {
       <div style={{ backgroundColor: 'var(--primary)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
+          <span className="font-bold text-white text-lg" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">
@@ -2942,7 +2948,7 @@ if (currentView === 'accessibility') {
       <div style={{ backgroundColor: 'var(--primary)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
           <button onClick={() => setCurrentView('landing')} className="text-gray-300 hover:text-white text-sm transition-colors">← Back</button>
-          <span className="font-bold text-white text-lg" style={{ fontFamily: "'Barlow Condensed', Impact, sans-serif", fontWeight: 900 }}>Decide to Run</span>
+          <span className="font-bold text-white text-lg" style={{ fontFamily: "proxima-nova, 'Helvetica Neue', Arial, sans-serif", fontWeight: 200, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Decide to Run</span>
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-6 py-12 flex-1">

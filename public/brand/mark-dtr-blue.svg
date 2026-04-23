@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!--
+    Decide to Run — DTR Brand Mark (Blue on White)
+    Use on white or light backgrounds.
+    Complements the CrowdBlue "C" mark — same rounded square format,
+    same Proxima Nova typeface, matching proportions.
+  -->
+  <!-- Blue rounded square background -->
+  <rect width="120" height="120" rx="20" fill="#004AAD"/>
+  <!-- DTR monogram — bold, centered, white -->
+  <text
+    x="60" y="80"
+    font-family="proxima-nova, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="46"
+    letter-spacing="2"
+    fill="#FDFDFD"
+    text-anchor="middle"
+  >DTR</text>
+</svg>

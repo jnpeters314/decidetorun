@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 96" fill="none">
+  <!--
+    Decide to Run — Wordmark (White on Blue)
+    Reversed lockup for buttons, banners, or branded backgrounds.
+    Font: Proxima Nova 200 (Ultra Light), all caps, wide tracking.
+  -->
+  <rect width="600" height="96" fill="#004AAD"/>
+  <text
+    x="40" y="62"
+    font-family="proxima-nova, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-weight="200"
+    font-size="44"
+    letter-spacing="12"
+    fill="#FDFDFD"
+  >DECIDE TO RUN</text>
+</svg>
