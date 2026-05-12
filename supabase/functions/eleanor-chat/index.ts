@@ -222,6 +222,17 @@ serve(async (req) => {
   try {
     const { messages } = await req.json();
 
+    // Log the latest user question (fire-and-forget)
+    const userMessages = (messages ?? []).filter((m: { role: string }) => m.role === "user");
+    const latestQuestion = userMessages.at(-1)?.content ?? null;
+    if (latestQuestion) {
+      supabase.from("eleanor_conversations").insert({
+        ip,
+        question: latestQuestion,
+        message_index: userMessages.length,
+      }).then(() => {});
+    }
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {

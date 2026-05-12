@@ -2,8 +2,9 @@ name: Import SoS Candidate Data
 
 on:
   schedule:
-    - cron: '0 8 * * 1'   # Every Monday at 8am UTC (midnight Pacific)
-  workflow_dispatch:        # Allow manual trigger from GitHub Actions UI
+    - cron: '0 8 * * 1'    # Every Monday at 8am UTC (midnight Pacific) — runs importers
+    - cron: '0 14 * * 1-5' # Every M–F at 14:00 UTC (7am PDT / 6am PST) — runs digest
+  workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
 
 jobs:
   import-fec:
@@ -89,6 +90,59 @@ jobs:
           content=$(echo "$body" | sed '/HTTP_STATUS:/d')
           echo "FL importer status: $status"
           echo "FL importer response: $content"
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
+
+  import-alaska:
+    name: Alaska APOC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger AK importer
+        run: |
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-alaska)
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "AK importer status: $status"
+          echo "AK importer response: $content"
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
+
+  import-virginia:
+    name: Virginia ELECT
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger VA importer
+        run: |
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-virginia)
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "VA importer status: $status"
+          echo "VA importer response: $content"
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
+
+  daily-filings-digest:
+    name: Daily Filings Digest Email
+    runs-on: ubuntu-latest
+    # Only run on the 14:00 UTC digest schedule (not the Monday importer schedule)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * 1-5' }}
+    steps:
+      - name: Send digest email
+        run: |
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/daily-filings-digest)
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "Digest status: $status"
+          echo "Digest response: $content"
           if [ "$status" != "200" ]; then
             exit 1
           fi

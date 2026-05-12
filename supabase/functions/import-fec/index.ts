@@ -139,14 +139,13 @@ function mapFecCandidate(c: Record<string, unknown>) {
   };
 }
 
-// FEC names are "LASTNAME, FIRSTNAME MIDDLE" — convert to "Firstname Lastname"
+// FEC names are "LASTNAME, FIRSTNAME MIDDLE" — convert to "Firstname Middle Lastname"
 function formatFecName(raw: string): string {
   const comma = raw.indexOf(",");
   if (comma === -1) return titleCase(raw);
   const last = raw.slice(0, comma).trim();
-  const rest = raw.slice(comma + 1).trim();
-  const first = rest.split(" ")[0] ?? "";
-  return `${titleCase(first)} ${titleCase(last)}`.trim();
+  const rest = raw.slice(comma + 1).trim().split(/\s+/).filter(Boolean);
+  return [...rest, last].map(titleCase).join(" ").trim();
 }
 
 function titleCase(s: string): string {
