@@ -7,46 +7,23 @@ on:
   workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
 
 jobs:
-  import-fec-house:
-    name: FEC House (all 50 states)
+  import-fec:
+    name: FEC (Federal — all 50 states)
     runs-on: ubuntu-latest
     steps:
-      - name: Import FEC House in page chunks
-        run: |
-          for start_page in 1 9 17 25 33 41; do
-            echo "--- House pages $start_page–$((start_page+7)) ---"
-            body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
-              -H "Content-Type: application/json" \
-              -d "{\"office\":\"H\",\"startPage\":$start_page,\"maxPages\":8}" \
-              https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
-            status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
-            content=$(echo "$body" | sed '/HTTP_STATUS:/d')
-            echo "Status: $status | $content"
-            if [ "$status" != "200" ]; then exit 1; fi
-            count=$(echo "$content" | grep -o '"count":[0-9]*' | cut -d: -f2)
-            if [ "${count:-0}" = "0" ]; then echo "No more House pages."; break; fi
-          done
-
-  import-fec-senate:
-    name: FEC Senate (all 50 states)
-    runs-on: ubuntu-latest
-    needs: import-fec-house
-    steps:
-      - name: Import FEC Senate in page chunks
-        run: |
-          for start_page in 1 9 17; do
-            echo "--- Senate pages $start_page–$((start_page+7)) ---"
-            body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
-              -H "Content-Type: application/json" \
-              -d "{\"office\":\"S\",\"startPage\":$start_page,\"maxPages\":8}" \
-              https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
-            status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
-            content=$(echo "$body" | sed '/HTTP_STATUS:/d')
-            echo "Status: $status | $content"
-            if [ "$status" != "200" ]; then exit 1; fi
-            count=$(echo "$content" | grep -o '"count":[0-9]*' | cut -d: -f2)
-            if [ "${count:-0}" = "0" ]; then echo "No more Senate pages."; break; fi
-          done
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install @supabase/supabase-js
+        working-directory: scripts
+      - name: Run FEC importer
+        run: node import-fec.js
+        working-directory: scripts
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
 
   import-california:
     name: California CAL-ACCESS
