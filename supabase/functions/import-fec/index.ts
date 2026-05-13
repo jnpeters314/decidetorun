@@ -35,11 +35,24 @@ serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+  // Accept optional ?office=H or ?office=S (or body JSON) to split into two invocations
+  let officeFilter: string | null = null;
+  try {
+    const url = new URL(req.url);
+    officeFilter = url.searchParams.get("office");
+    if (!officeFilter) {
+      const body = await req.json().catch(() => ({}));
+      officeFilter = body?.office ?? null;
+    }
+  } catch { /* ignore parse errors */ }
+
+  const offices = officeFilter ? [officeFilter.toUpperCase()] : ["H", "S"];
+
   try {
     let totalImported = 0;
 
-    // Fetch House and Senate separately; upsert each page immediately to avoid memory limits
-    for (const office of ["H", "S"]) {
+    // Upsert each page immediately to avoid memory limits
+    for (const office of offices) {
       let page = 1;
       let totalPages = 1;
 

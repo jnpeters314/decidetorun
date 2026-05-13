@@ -7,19 +7,39 @@ on:
   workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
 
 jobs:
-  import-fec:
-    name: FEC (Federal — all 50 states)
+  import-fec-house:
+    name: FEC House (all 50 states)
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger FEC importer
+      - name: Trigger FEC House importer
         run: |
           body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
             -H "Content-Type: application/json" \
+            -d '{"office":"H"}' \
             https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
           status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
           content=$(echo "$body" | sed '/HTTP_STATUS:/d')
-          echo "FEC importer status: $status"
-          echo "FEC importer response: $content"
+          echo "FEC House status: $status"
+          echo "FEC House response: $content"
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
+
+  import-fec-senate:
+    name: FEC Senate (all 50 states)
+    runs-on: ubuntu-latest
+    needs: import-fec-house
+    steps:
+      - name: Trigger FEC Senate importer
+        run: |
+          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"office":"S"}' \
+            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
+          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+          echo "FEC Senate status: $status"
+          echo "FEC Senate response: $content"
           if [ "$status" != "200" ]; then
             exit 1
           fi
