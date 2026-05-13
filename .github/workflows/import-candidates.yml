@@ -11,38 +11,42 @@ jobs:
     name: FEC House (all 50 states)
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger FEC House importer
+      - name: Import FEC House in page chunks
         run: |
-          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
-            -H "Content-Type: application/json" \
-            -d '{"office":"H"}' \
-            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
-          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
-          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
-          echo "FEC House status: $status"
-          echo "FEC House response: $content"
-          if [ "$status" != "200" ]; then
-            exit 1
-          fi
+          for start_page in 1 9 17 25 33 41; do
+            echo "--- House pages $start_page–$((start_page+7)) ---"
+            body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+              -H "Content-Type: application/json" \
+              -d "{\"office\":\"H\",\"startPage\":$start_page,\"maxPages\":8}" \
+              https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
+            status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+            content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+            echo "Status: $status | $content"
+            if [ "$status" != "200" ]; then exit 1; fi
+            count=$(echo "$content" | grep -o '"count":[0-9]*' | cut -d: -f2)
+            if [ "${count:-0}" = "0" ]; then echo "No more House pages."; break; fi
+          done
 
   import-fec-senate:
     name: FEC Senate (all 50 states)
     runs-on: ubuntu-latest
     needs: import-fec-house
     steps:
-      - name: Trigger FEC Senate importer
+      - name: Import FEC Senate in page chunks
         run: |
-          body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
-            -H "Content-Type: application/json" \
-            -d '{"office":"S"}' \
-            https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
-          status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
-          content=$(echo "$body" | sed '/HTTP_STATUS:/d')
-          echo "FEC Senate status: $status"
-          echo "FEC Senate response: $content"
-          if [ "$status" != "200" ]; then
-            exit 1
-          fi
+          for start_page in 1 9 17; do
+            echo "--- Senate pages $start_page–$((start_page+7)) ---"
+            body=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST \
+              -H "Content-Type: application/json" \
+              -d "{\"office\":\"S\",\"startPage\":$start_page,\"maxPages\":8}" \
+              https://pmiqbxxvoabowwiedrej.supabase.co/functions/v1/import-fec)
+            status=$(echo "$body" | grep "HTTP_STATUS:" | cut -d: -f2)
+            content=$(echo "$body" | sed '/HTTP_STATUS:/d')
+            echo "Status: $status | $content"
+            if [ "$status" != "200" ]; then exit 1; fi
+            count=$(echo "$content" | grep -o '"count":[0-9]*' | cut -d: -f2)
+            if [ "${count:-0}" = "0" ]; then echo "No more Senate pages."; break; fi
+          done
 
   import-california:
     name: California CAL-ACCESS

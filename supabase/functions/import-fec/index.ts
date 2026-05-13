@@ -35,28 +35,20 @@ serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-  // Accept optional ?office=H or ?office=S (or body JSON) to split into two invocations
-  let officeFilter: string | null = null;
-  try {
-    const url = new URL(req.url);
-    officeFilter = url.searchParams.get("office");
-    if (!officeFilter) {
-      const body = await req.json().catch(() => ({}));
-      officeFilter = body?.office ?? null;
-    }
-  } catch { /* ignore parse errors */ }
-
-  const offices = officeFilter ? [officeFilter.toUpperCase()] : ["H", "S"];
+  const body = await req.json().catch(() => ({}));
+  const officeFilter: string = (body?.office ?? "H").toUpperCase();
+  const startPage: number = Math.max(1, parseInt(body?.startPage ?? "1", 10));
+  const maxPages: number = Math.max(1, parseInt(body?.maxPages ?? "8", 10));
 
   try {
     let totalImported = 0;
 
-    // Upsert each page immediately to avoid memory limits
-    for (const office of offices) {
-      let page = 1;
-      let totalPages = 1;
+    // Process one office per invocation, one chunk of pages at a time
+    for (const office of [officeFilter]) {
+      let page = startPage;
+      let totalPages = 999;
 
-      while (page <= totalPages) {
+      while (page <= totalPages && page < startPage + maxPages) {
         const url =
           `${FEC_BASE}/candidates/?election_year=2026&office=${office}` +
           `&per_page=100&page=${page}&api_key=${FEC_API_KEY}&is_active_candidate=true`;
@@ -104,15 +96,8 @@ serve(async (req) => {
       }
     }
 
-    if (totalImported === 0) {
-      return new Response(
-        JSON.stringify({ message: "No FEC 2026 candidates found yet", count: 0 }),
-        { headers: CORS_HEADERS }
-      );
-    }
-
     return new Response(
-      JSON.stringify({ message: "FEC import complete", count: totalImported }),
+      JSON.stringify({ message: "FEC import complete", count: totalImported, office: officeFilter, startPage }),
       { headers: CORS_HEADERS }
     );
   } catch (err) {
