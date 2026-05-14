@@ -2823,7 +2823,7 @@ if (currentView === 'planToRun' && currentPlan) {
                 Ask Questions
               </button>
               
-                <a href="https://crowdblue.com"
+                <a href="https://crowdblue.com/campaigns/learn"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors text-center flex items-center justify-center gap-2"
