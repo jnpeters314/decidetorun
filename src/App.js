@@ -1580,24 +1580,49 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Guide lead magnet */}
-        <div style={{ backgroundColor: '#f0f5ff', borderTop: '1px solid #dbeafe', borderBottom: '1px solid #dbeafe' }} className="px-6 py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#dbeafe' }}>
-              <BookOpen className="w-6 h-6" style={{ color: 'var(--primary)' }} />
+        {/* Guide lead magnet — full-width card matching site card style */}
+        <div className="max-w-6xl mx-auto px-6 pb-10">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6 md:p-8" style={{ backgroundColor: 'var(--primary)' }}>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div className="flex items-start gap-4">
+                  <span className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                    <BookOpen className="w-6 h-6 text-white" />
+                  </span>
+                  <div>
+                    <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-2 text-white" style={{ backgroundColor: 'var(--secondary)' }}>
+                      Free Download
+                    </span>
+                    <h2 className="text-xl font-bold text-white">Choosing the Right Race</h2>
+                    <p className="text-blue-200 text-sm mt-1 max-w-lg">
+                      A practical framework for first-time candidates — compare office levels, score your options, and know exactly what to research before you file.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setGuideStatus('idle'); setGuideEmail(''); setShowGuideModal(true); }}
+                  className="shrink-0 bg-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors flex items-center gap-2 self-start md:self-center"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Get the Free Guide
+                </button>
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Not sure which race is right for you?</h2>
-            <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
-              Download our free guide — a practical framework for choosing the right office based on your goals, network, and resources.
-            </p>
-            <button
-              onClick={() => { setGuideStatus('idle'); setGuideEmail(''); setShowGuideModal(true); }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: 'var(--primary)' }}
-            >
-              <BookOpen className="w-4 h-4" />
-              Get the Free Guide
-            </button>
+            <div className="px-6 md:px-8 py-5 grid sm:grid-cols-3 gap-4">
+              {[
+                { icon: BarChart2, text: 'Office level comparison — Local, County, State, and Federal with typical budgets' },
+                { icon: CheckCircle, text: 'Race Selection Scoring Matrix — rate and compare your options side by side' },
+                { icon: Flag, text: 'Pre-filing research checklist — residency, signatures, fees, and more' },
+              ].map(({ icon: Icon, text }, i) => (
+                <div key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                  <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: 'var(--secondary-1)' }}>
+                    <Icon className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
+                  </span>
+                  {text}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
