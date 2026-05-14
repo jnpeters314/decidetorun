@@ -507,24 +507,78 @@ const CompareModal = ({ offices, onClose }) => {
   );
 };
 
-const SiteFooter = ({ onNavigate }) => (
-  <footer style={{ backgroundColor: 'var(--black)' }} className="mt-auto">
-    <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <span className="text-gray-300 text-sm">© {new Date().getFullYear()} Decide to Run. All rights reserved.</span>
-      <div className="flex items-center gap-6">
-        <a href="https://crowdblue.com/about/terms" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white text-sm transition-colors">
-          Terms of Service
-        </a>
-        <a href="https://crowdblue.com/about/privacy" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white text-sm transition-colors">
-          Privacy Policy
-        </a>
-        <button onClick={() => onNavigate('accessibility')} className="text-gray-300 hover:text-white text-sm transition-colors">
-          Accessibility
-        </button>
+const SiteFooter = ({ onNavigate }) => {
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadStatus, setLeadStatus] = useState('idle'); // idle | submitting | success | error
+
+  const handleLeadSubmit = async (e) => {
+    e.preventDefault();
+    if (!leadEmail) return;
+    setLeadStatus('submitting');
+    const { error } = await supabase.from('leads').insert({ email: leadEmail });
+    if (error && error.code === '23505') {
+      setLeadStatus('success'); // already subscribed — treat as success
+    } else if (error) {
+      setLeadStatus('error');
+    } else {
+      setLeadStatus('success');
+    }
+  };
+
+  return (
+    <footer style={{ backgroundColor: 'var(--black)' }} className="mt-auto">
+      {/* Lead capture bar */}
+      <div style={{ backgroundColor: '#0a2a6e', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="max-w-2xl mx-auto px-6 py-10 text-center">
+          <h2 className="text-white text-xl font-bold mb-2">Stay Informed</h2>
+          <p className="text-gray-300 text-sm mb-6">
+            Get updates on candidates and races in your area — delivered to your inbox.
+          </p>
+          {leadStatus === 'success' ? (
+            <p className="text-green-400 font-medium">You're in! We'll be in touch.</p>
+          ) : (
+            <form onSubmit={handleLeadSubmit} className="flex flex-col sm:flex-row gap-3 justify-center">
+              <input
+                type="email"
+                required
+                placeholder="Enter your email"
+                value={leadEmail}
+                onChange={(e) => setLeadEmail(e.target.value)}
+                className="flex-1 max-w-xs px-4 py-2 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button
+                type="submit"
+                disabled={leadStatus === 'submitting'}
+                className="px-6 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                style={{ backgroundColor: 'var(--primary)' }}
+              >
+                {leadStatus === 'submitting' ? 'Subscribing…' : 'Subscribe'}
+              </button>
+            </form>
+          )}
+          {leadStatus === 'error' && (
+            <p className="text-red-400 text-xs mt-2">Something went wrong — please try again.</p>
+          )}
+        </div>
       </div>
-    </div>
-  </footer>
-);
+      {/* Footer links */}
+      <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span className="text-gray-300 text-sm">© {new Date().getFullYear()} Decide to Run. All rights reserved.</span>
+        <div className="flex items-center gap-6">
+          <a href="https://crowdblue.com/about/terms" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white text-sm transition-colors">
+            Terms of Service
+          </a>
+          <a href="https://crowdblue.com/about/privacy" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white text-sm transition-colors">
+            Privacy Policy
+          </a>
+          <button onClick={() => onNavigate('accessibility')} className="text-gray-300 hover:text-white text-sm transition-colors">
+            Accessibility
+          </button>
+        </div>
+      </div>
+    </footer>
+  );
+};
 
 // Persistent Header Component
 const AppHeader = ({ currentView, user, onNavigate, onSignOut, onViewSaved, onShowLogin }) => {
