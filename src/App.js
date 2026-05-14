@@ -12,7 +12,7 @@ import { SubmitRaceModal } from './components/SubmitRaceModal';
 import { RaceAlertModal } from './components/RaceAlertModal';
   // Import the template system
   import { getCampaignPlanTemplate, generateMarkdown } from './campaignPlanTemplates';
-  import { generateCampaignPlanPDF } from './utils/pdfGenerator';
+  import { generateCampaignPlanPDF, generateRaceGuidePDF } from './utils/pdfGenerator';
   import { fetchLocalRaces, fetchStatewideRaces, getCityFromZip, getDistrictsFromLatLng, fetchDistrictRaces } from './utils/ballotpedia';
   import { getLegislatorsForLocation, enrichOfficesWithIncumbents } from './utils/openstates';
 
@@ -811,6 +811,9 @@ function App() {
   const [uncontestedCount, setUncontestedCount] = useState(null);
   const [sosDataFreshness, setSosDataFreshness] = useState(null); // ISO string of last import
   const [showSubmitRaceModal, setShowSubmitRaceModal] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [guideEmail, setGuideEmail] = useState('');
+  const [guideStatus, setGuideStatus] = useState('idle'); // idle | submitting | success | error
   const [showAlertModal, setShowAlertModal] = useState(false);
 
   // Fetch all offices with no candidates
@@ -1576,8 +1579,105 @@ useEffect(() => {
             Free to use · Covers all 50 states · Real FEC data
           </div>
         </div>
+
+        {/* Guide lead magnet */}
+        <div style={{ backgroundColor: '#f0f5ff', borderTop: '1px solid #dbeafe', borderBottom: '1px solid #dbeafe' }} className="px-6 py-12">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#dbeafe' }}>
+              <BookOpen className="w-6 h-6" style={{ color: 'var(--primary)' }} />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Not sure which race is right for you?</h2>
+            <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
+              Download our free guide — a practical framework for choosing the right office based on your goals, network, and resources.
+            </p>
+            <button
+              onClick={() => { setGuideStatus('idle'); setGuideEmail(''); setShowGuideModal(true); }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: 'var(--primary)' }}
+            >
+              <BookOpen className="w-4 h-4" />
+              Get the Free Guide
+            </button>
+          </div>
+        </div>
+
       <SiteFooter onNavigate={setCurrentView} />
       <SubmitRaceModal isOpen={showSubmitRaceModal} onClose={() => setShowSubmitRaceModal(false)} />
+
+      {/* Race guide modal */}
+      {showGuideModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+            <div className="px-8 py-6" style={{ backgroundColor: 'var(--primary)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-blue-200 uppercase tracking-widest">Free Guide</span>
+                <button onClick={() => setShowGuideModal(false)} className="text-white/60 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <h2 className="text-white text-xl font-bold">Choosing the Right Race</h2>
+              <p className="text-blue-200 text-sm mt-1">A decision framework for first-time candidates</p>
+            </div>
+            <div className="px-8 py-6">
+              {guideStatus === 'success' ? (
+                <div className="text-center py-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <p className="font-semibold text-gray-900 mb-1">Your download is ready!</p>
+                  <p className="text-gray-500 text-sm mb-5">If it didn't start automatically, click below.</p>
+                  <button
+                    onClick={() => generateRaceGuidePDF()}
+                    className="w-full py-3 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: 'var(--primary)' }}
+                  >
+                    Download PDF
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-gray-500 text-sm mb-5">
+                    Enter your email to get instant access to the guide — plus occasional updates on candidate filings in your area.
+                  </p>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!guideEmail) return;
+                    setGuideStatus('submitting');
+                    const { error } = await supabase.from('leads').insert({ email: guideEmail, source: 'race-guide' });
+                    if (error && error.code !== '23505' && error) {
+                      setGuideStatus('error');
+                      return;
+                    }
+                    setGuideStatus('success');
+                    generateRaceGuidePDF();
+                  }}>
+                    <input
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      value={guideEmail}
+                      onChange={(e) => setGuideEmail(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mb-3"
+                    />
+                    <button
+                      type="submit"
+                      disabled={guideStatus === 'submitting'}
+                      className="w-full py-3 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-60"
+                      style={{ backgroundColor: 'var(--primary)' }}
+                    >
+                      {guideStatus === 'submitting' ? 'Just a moment…' : 'Download Free Guide'}
+                    </button>
+                    {guideStatus === 'error' && (
+                      <p className="text-red-500 text-xs text-center mt-2">Something went wrong — please try again.</p>
+                    )}
+                  </form>
+                  <p className="text-xs text-gray-400 text-center mt-3">No spam. Unsubscribe anytime.</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     );
   }
